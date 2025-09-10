@@ -9,16 +9,23 @@ class Magang extends Model
 {
     use HasFactory;
 
-    // kalau tabel plural (magangs), ini bisa dihapus karena Laravel otomatis tahu
-    // protected $table = 'magangs';
+    protected $table = 'magang';
 
     protected $fillable = [
+        'no_formulir',
         'nama',
+        'nik',
         'nim',
-        'jurusan',
-        'universitas',
-        'email',
         'no_hp',
-        'alamat',
+        'universitas',
+        'alamat_universitas',
+        'jurusan',
+        'semester',
+        'divisi_tujuan',
+        'waktu_mulai',
+        'waktu_selesai',
+        'proposal',
+        'surat_permohonan',
+        'status_pengajuan',
     ];
 }

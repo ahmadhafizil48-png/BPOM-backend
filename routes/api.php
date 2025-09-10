@@ -1,16 +1,21 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MagangController;
-use App\Http\Controllers\AuthController; // pastikan AuthController dikenali
 
-// Route untuk autentikasi user
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// 🔹 Auth routes
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-Route::apiResource('magang', MagangController::class);
-// Route untuk ambil data user yang sedang login
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+
+// 🔹 Routes dengan proteksi auth
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Dashboard routes
+    Route::get('/dashboard/admin', [DashboardController::class, 'adminDashboard'])->middleware('role:admin');
+    Route::get('/dashboard/pembimbing', [DashboardController::class, 'pembimbingDashboard'])->middleware('role:pembimbing');
+    Route::get('/dashboard/user', [DashboardController::class, 'userDashboard'])->middleware('role:user');
+
+    // Magang routes
+    Route::apiResource('magang', MagangController::class);
+});
