@@ -5,33 +5,32 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Magang extends Model
+class DetailPelamar extends Model
 {
     use HasFactory;
 
-    protected $table = 'magang';
-    protected $primaryKey = 'id';
+    protected $table = 'detail_pelamar';
 
-    // karena kolom id bertipe bigint
-    protected $keyType = 'int';
+    // 🔓 semua kolom bisa diisi mass assignment
+    protected $guarded = [];
 
-    public $incrementing = true;
-
+    /*
+    // 🔒 kalau mau lebih aman, pakai fillable (pilih salah satu, bukan dua-duanya)
     protected $fillable = [
-        'no_formulir',
         'nama',
         'nik',
         'nim',
         'no_hp',
         'universitas',
-        'alamat_universitas',
+        'alamat_univ',
         'jurusan',
         'semester',
         'divisi_tujuan',
         'waktu_mulai',
         'waktu_selesai',
         'proposal',
-        'surat_permohonan',
-        'status_pengajuan',
+        'surat',
+        'status',
     ];
+    */
 }
