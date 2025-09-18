@@ -5,19 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Sertifikat extends Model
+class RiwayatAdmin extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'nama',
-        'divisi_id',
-        'tanggal_selesai',
-        'status',
+        'admin_id',
+        'aksi',
+        'tanggal',
     ];
 
-    public function divisi()
+    public function admin()
     {
-        return $this->belongsTo(Divisi::class);
+        return $this->belongsTo(User::class, 'admin_id');
     }
 }

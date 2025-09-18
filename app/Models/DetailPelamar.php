@@ -11,12 +11,8 @@ class DetailPelamar extends Model
 
     protected $table = 'detail_pelamar';
 
-    // 🔓 semua kolom bisa diisi mass assignment
-    protected $guarded = [];
-
-    /*
-    // 🔒 kalau mau lebih aman, pakai fillable (pilih salah satu, bukan dua-duanya)
     protected $fillable = [
+        'magang_id',
         'nama',
         'nik',
         'nim',
@@ -32,5 +28,9 @@ class DetailPelamar extends Model
         'surat',
         'status',
     ];
-    */
+
+    public function magang()
+    {
+        return $this->belongsTo(Magang::class, 'magang_id');
+    }
 }

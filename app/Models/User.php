@@ -13,9 +13,10 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
-        'email', 
+        'email',
         'password',
-        'role_id'
+        'role_id',
+        'pembimbing_id', // ✅ tambahkan supaya bisa mass assignment
     ];
 
     protected $hidden = [
@@ -28,9 +29,15 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    // ✅ TAMBAHKAN INI - Relationship ke Role
+    // ✅ Relasi ke Role
     public function role()
     {
-        return $this->belongsTo(\App\Models\Role::class, 'role_id');
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    // ✅ Relasi ke Pembimbing
+    public function pembimbing()
+    {
+        return $this->belongsTo(Pembimbing::class, 'pembimbing_id');
     }
 }

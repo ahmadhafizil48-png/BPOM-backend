@@ -6,23 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('pimpinans', function (Blueprint $table) {
-            //
+        Schema::create('pimpinans', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama_pimpinan');
+            $table->string('jabatan');
+            $table->string('kantor')->nullable();
+            $table->string('tanda_tangan')->nullable(); // simpan path file tanda tangan
+            $table->enum('status', ['aktif', 'non-aktif'])->default('aktif');
+            $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('pimpinans', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('pimpinans');
     }
 };

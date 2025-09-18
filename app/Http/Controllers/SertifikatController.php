@@ -7,59 +7,49 @@ use Illuminate\Http\Request;
 
 class SertifikatController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return response()->json(
+            Sertifikat::with(['pelamar', 'pimpinan'])->get(),
+            200
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show($id)
     {
-        //
+        $sertifikat = Sertifikat::with(['pelamar', 'pimpinan'])->findOrFail($id);
+        return response()->json($sertifikat, 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'detail_pelamar_id' => 'required|exists:detail_pelamar,id',
+            'nomor_sertifikat' => 'required|string|unique:sertifikats',
+            'tanggal_terbit' => 'required|date',
+            'pimpinan_id' => 'required|exists:pimpinans,id',
+            'file' => 'nullable|string',
+        ]);
+
+        $sertifikat = Sertifikat::create($validated);
+
+        return response()->json($sertifikat, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Sertifikat $sertifikat)
+    public function update(Request $request, $id)
     {
-        //
+        $sertifikat = Sertifikat::findOrFail($id);
+
+        $sertifikat->update($request->all());
+
+        return response()->json($sertifikat, 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Sertifikat $sertifikat)
+    public function destroy($id)
     {
-        //
-    }
+        $sertifikat = Sertifikat::findOrFail($id);
+        $sertifikat->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Sertifikat $sertifikat)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Sertifikat $sertifikat)
-    {
-        //
+        return response()->json(null, 204);
     }
 }

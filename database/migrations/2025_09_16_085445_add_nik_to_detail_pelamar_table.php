@@ -9,12 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::table('detail_pelamar', function (Blueprint $table) {
-            //
-        });
-    }
+    public function up()
+{
+    Schema::table('detail_pelamar', function (Blueprint $table) {
+        $table->string('nik')->unique()->after('id');
+    });
+}
+
 
     /**
      * Reverse the migrations.

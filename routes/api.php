@@ -97,7 +97,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/', [PimpinanController::class, 'store']);
         Route::put('/{id}', [PimpinanController::class, 'update']);
         Route::delete('/{id}', [PimpinanController::class, 'destroy']);
-        // 🔹 Aksi aktifkan/nonaktifkan - DIPERBAIKI INDENTASINYA
+        // 🔹 Aksi aktifkan/nonaktifkan
         Route::put('/{id}/status', [PimpinanController::class, 'updateStatus']);
     });
 
@@ -110,6 +110,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [LaporanRiwayatController::class, 'index']);
         Route::get('/riwayat-admin', [LaporanRiwayatController::class, 'riwayatAdmin']);
         Route::get('/riwayat-user-selesai', [LaporanRiwayatController::class, 'riwayatUserSelesai']);
+        Route::get('/riwayat-user-ditolak', [LaporanRiwayatController::class, 'riwayatUserDitolak']); // 🔹 ditambahkan
         Route::post('/export', [LaporanRiwayatController::class, 'export']);
         Route::get('/filter-options', [LaporanRiwayatController::class, 'getFilterOptions']);
     });
