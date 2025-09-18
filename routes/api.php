@@ -11,6 +11,8 @@ use App\Http\Controllers\SertifikatController;
 use App\Http\Controllers\PimpinanController;
 use App\Http\Controllers\DivisiController;
 use App\Http\Controllers\LaporanRiwayatController;
+use App\Http\Controllers\LaporanPembimbingController;
+use App\Http\Controllers\LaporanUserAktifController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,7 +55,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
     });
 
-    // 📚 Pembimbing
+    /*
+    |--------------------------------------------------------------------------
+    | Pembimbing Routes
+    |--------------------------------------------------------------------------
+    */
     Route::get('/pembimbing', [PembimbingController::class, 'index']);
     Route::get('/pembimbing/{id}', [PembimbingController::class, 'show']);
     Route::post('/pembimbing', [PembimbingController::class, 'store']);
@@ -67,10 +73,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('detail-pelamar')->group(function () {
-        Route::get('/', [DetailPelamarController::class, 'index']);     // ✅ ambil semua pelamar
-        Route::get('/{id}', [DetailPelamarController::class, 'show']);  // detail pelamar by id
-        Route::post('/', [DetailPelamarController::class, 'store']);    // buat pelamar baru
-        Route::put('/{id}', [DetailPelamarController::class, 'update']); // update status
+        Route::get('/', [DetailPelamarController::class, 'index']);
+        Route::get('/{id}', [DetailPelamarController::class, 'show']);
+        Route::post('/', [DetailPelamarController::class, 'store']);
+        Route::put('/{id}', [DetailPelamarController::class, 'update']);
     });
 
     /*
@@ -97,7 +103,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/', [PimpinanController::class, 'store']);
         Route::put('/{id}', [PimpinanController::class, 'update']);
         Route::delete('/{id}', [PimpinanController::class, 'destroy']);
-        // 🔹 Aksi aktifkan/nonaktifkan
         Route::put('/{id}/status', [PimpinanController::class, 'updateStatus']);
     });
 
@@ -110,9 +115,36 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [LaporanRiwayatController::class, 'index']);
         Route::get('/riwayat-admin', [LaporanRiwayatController::class, 'riwayatAdmin']);
         Route::get('/riwayat-user-selesai', [LaporanRiwayatController::class, 'riwayatUserSelesai']);
-        Route::get('/riwayat-user-ditolak', [LaporanRiwayatController::class, 'riwayatUserDitolak']); // 🔹 ditambahkan
+        Route::get('/riwayat-user-ditolak', [LaporanRiwayatController::class, 'riwayatUserDitolak']);
+        Route::get('/riwayat-pelamar', [LaporanRiwayatController::class, 'riwayatPelamar']);
         Route::post('/export', [LaporanRiwayatController::class, 'export']);
         Route::get('/filter-options', [LaporanRiwayatController::class, 'getFilterOptions']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Laporan Pembimbing Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('laporan-pembimbing')->group(function () {
+        Route::get('/', [LaporanPembimbingController::class, 'index']);
+        Route::post('/', [LaporanPembimbingController::class, 'store']);
+        Route::get('/{id}', [LaporanPembimbingController::class, 'show']);
+        Route::put('/{id}', [LaporanPembimbingController::class, 'update']);
+        Route::delete('/{id}', [LaporanPembimbingController::class, 'destroy']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Laporan User Aktif Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('laporan-user-aktif')->group(function () {
+        Route::get('/', [LaporanUserAktifController::class, 'index']);
+        Route::post('/', [LaporanUserAktifController::class, 'store']);
+        Route::get('/{id}', [LaporanUserAktifController::class, 'show']);
+        Route::put('/{id}', [LaporanUserAktifController::class, 'update']);
+        Route::delete('/{id}', [LaporanUserAktifController::class, 'destroy']);
     });
 
     /*
