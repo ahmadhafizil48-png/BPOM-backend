@@ -14,6 +14,7 @@ use App\Http\Controllers\LaporanRiwayatController;
 use App\Http\Controllers\LaporanPembimbingController;
 use App\Http\Controllers\LaporanUserAktifController;
 use App\Http\Controllers\DaftarAkunController;
+use App\Http\Controllers\ProyekUserController; // ✅ tambahan controller
 
 /*
 |--------------------------------------------------------------------------
@@ -179,4 +180,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/{id}', [DivisiController::class, 'update']);
         Route::delete('/{id}', [DivisiController::class, 'destroy']);
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Proyek User Routes (Tambahan Manajemen Proyek)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('proyek-user')->group(function () {
+    Route::get('/', [ProyekUserController::class, 'index']);                        // list semua proyek user
+    Route::post('/assign', [ProyekUserController::class, 'assignProject']);         // assign proyek ke user
+    Route::put('/{id}/status', [ProyekUserController::class, 'updateStatus']);      // update status proyek
+    Route::get('/{id}/progress', [ProyekUserController::class, 'progress']);        // lihat progress proyek
+});
 });
