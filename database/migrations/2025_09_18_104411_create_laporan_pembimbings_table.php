@@ -6,20 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('laporan_pembimbings', function (Blueprint $table) {
             $table->id();
+            $table->string('nama');
+            $table->string('divisi');
+            $table->integer('jumlah_user')->default(0);
+            $table->integer('selesai')->default(0);
+            $table->float('rata_nilai')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('laporan_pembimbings');

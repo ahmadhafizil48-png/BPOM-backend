@@ -15,6 +15,8 @@ use App\Http\Controllers\LaporanPembimbingController;
 use App\Http\Controllers\LaporanUserAktifController;
 use App\Http\Controllers\DaftarAkunController;
 use App\Http\Controllers\ProyekUserController; // ✅ tambahan controller
+use App\Http\Controllers\UserBimbinganController;
+use App\Http\Controllers\KomplainNilaiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -192,4 +194,64 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/{id}/status', [ProyekUserController::class, 'updateStatus']);      // update status proyek
     Route::get('/{id}/progress', [ProyekUserController::class, 'progress']);        // lihat progress proyek
 });
+/*
+|--------------------------------------------------------------------------
+| User Bimbingan Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('user-bimbingan')->group(function () {
+    Route::get('/', [UserBimbinganController::class, 'index']);              // list data
+    Route::post('/', [UserBimbinganController::class, 'store']);             // tambah data
+    Route::put('/{id}/status', [UserBimbinganController::class, 'updateStatus']); // update status
+    Route::delete('/{id}', [UserBimbinganController::class, 'destroy']);     // hapus data
+});
+/*
+|--------------------------------------------------------------------------
+| Riwayat User Bimbingan Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('riwayat-user-bimbingan')->group(function () {
+    Route::get('/', [\App\Http\Controllers\RiwayatUserBimbinganController::class, 'index']);    // list semua riwayat
+    Route::get('/{id}', [\App\Http\Controllers\RiwayatUserBimbinganController::class, 'show']); // detail riwayat
+    Route::post('/', [\App\Http\Controllers\RiwayatUserBimbinganController::class, 'store']);   // tambah riwayat
+    Route::put('/{id}', [\App\Http\Controllers\RiwayatUserBimbinganController::class, 'update']); // update riwayat
+    Route::delete('/{id}', [\App\Http\Controllers\RiwayatUserBimbinganController::class, 'destroy']); // hapus riwayat
+});
+Route::prefix('permintaan-absensi')->group(function () {
+    Route::get('/', [\App\Http\Controllers\PermintaanAbsensiController::class, 'index']);
+    Route::post('/', [\App\Http\Controllers\PermintaanAbsensiController::class, 'store']);
+    Route::put('/{id}', [\App\Http\Controllers\PermintaanAbsensiController::class, 'update']);
+    Route::delete('/{id}', [\App\Http\Controllers\PermintaanAbsensiController::class, 'destroy']);
+});
+Route::prefix('riwayat-absensi')->group(function () {
+    Route::get('/', [\App\Http\Controllers\RiwayatAbsensiController::class, 'index']);
+    Route::post('/', [\App\Http\Controllers\RiwayatAbsensiController::class, 'store']);
+    Route::put('/{id}', [\App\Http\Controllers\RiwayatAbsensiController::class, 'update']);
+    Route::delete('/{id}', [\App\Http\Controllers\RiwayatAbsensiController::class, 'destroy']);
+});
+Route::prefix('penilaian')->group(function () {
+    Route::get('/', [\App\Http\Controllers\PenilaianController::class, 'index']);
+    Route::post('/', [\App\Http\Controllers\PenilaianController::class, 'store']);
+    Route::put('/{id}', [\App\Http\Controllers\PenilaianController::class, 'update']);
+    Route::delete('/{id}', [\App\Http\Controllers\PenilaianController::class, 'destroy']);
+});
+Route::prefix('komplain')->group(function () {
+    Route::get('/', [KomplainNilaiController::class, 'index']);   // list semua komplain
+    Route::post('/', [KomplainNilaiController::class, 'store']);  // tambah komplain
+    Route::put('/{id}', [KomplainNilaiController::class, 'update']); // update status/isi komplain
+    Route::delete('/{id}', [KomplainNilaiController::class, 'destroy']); // hapus komplain
+});
+/*
+|--------------------------------------------------------------------------
+| Riwayat Penilaian Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('riwayat-penilaian')->group(function () {
+    Route::get('/', [\App\Http\Controllers\RiwayatPenilaianController::class, 'index']);   // list semua riwayat penilaian
+    Route::post('/', [\App\Http\Controllers\RiwayatPenilaianController::class, 'store']);  // tambah riwayat penilaian
+    Route::get('/{id}', [\App\Http\Controllers\RiwayatPenilaianController::class, 'show']); // detail riwayat
+    Route::put('/{id}', [\App\Http\Controllers\RiwayatPenilaianController::class, 'update']); // update
+    Route::delete('/{id}', [\App\Http\Controllers\RiwayatPenilaianController::class, 'destroy']); // hapus
+});
+
 });

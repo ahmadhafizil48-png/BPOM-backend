@@ -10,7 +10,7 @@ class LaporanPembimbingController extends Controller
     public function index()
     {
         return LaporanPembimbing::all();
-    }
+    }c
 
     public function show($id)
     {
