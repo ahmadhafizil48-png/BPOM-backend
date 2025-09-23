@@ -13,6 +13,7 @@ use App\Http\Controllers\DivisiController;
 use App\Http\Controllers\LaporanRiwayatController;
 use App\Http\Controllers\LaporanPembimbingController;
 use App\Http\Controllers\LaporanUserAktifController;
+use App\Http\Controllers\DaftarAkunController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +39,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // 🔑 Auth
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // ✅ Tambahan untuk Pengaturan Admin
+    Route::put('/admin/profile', [AuthController::class, 'updateProfile']);
+    Route::put('/admin/change-password', [AuthController::class, 'changePassword']);
+
     // 📊 Dashboard berdasarkan role
     Route::get('/dashboard/admin', [DashboardController::class, 'adminDashboard'])->middleware('role:admin');
     Route::get('/dashboard/pembimbing', [DashboardController::class, 'pembimbingDashboard'])->middleware('role:pembimbing');
@@ -53,6 +58,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Daftar Akun Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('daftar-akun')->group(function () {
+        Route::get('/', [DaftarAkunController::class, 'index']);      // list akun
+        Route::get('/{id}', [DaftarAkunController::class, 'show']);  // detail akun
+        Route::post('/', [DaftarAkunController::class, 'store']);    // tambah akun
+        Route::put('/{id}', [DaftarAkunController::class, 'update']); // update akun
+        Route::delete('/{id}', [DaftarAkunController::class, 'destroy']); // hapus akun
+        Route::put('/{id}/status', [DaftarAkunController::class, 'updateStatus']); // aktif/nonaktif
+        Route::put('/{id}/reset-password', [DaftarAkunController::class, 'resetPassword']); // reset password
     });
 
     /*

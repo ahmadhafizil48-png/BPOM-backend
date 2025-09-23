@@ -77,4 +77,50 @@ class AuthController extends Controller
             'message' => 'Logout berhasil',
         ]);
     }
+
+    // ✏️ Ubah profil admin (name & email)
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+        ]);
+
+        $user->update($validated);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Profil berhasil diperbarui',
+            'user'    => $user,
+        ]);
+    }
+
+    // 🔒 Ganti password admin
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'old_password'      => 'required|string',
+            'new_password'      => 'required|string|min:6|confirmed', // harus ada new_password_confirmation
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->old_password, $user->password)) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Password lama salah',
+            ], 400);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->new_password),
+        ]);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Password berhasil diubah',
+        ]);
+    }
 }
