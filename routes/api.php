@@ -246,12 +246,6 @@ Route::prefix('komplain')->group(function () {
 | Riwayat Penilaian Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('riwayat-penilaian')->group(function () {
-    Route::get('/', [\App\Http\Controllers\RiwayatPenilaianController::class, 'index']);   // list semua riwayat penilaian
-    Route::post('/', [\App\Http\Controllers\RiwayatPenilaianController::class, 'store']);  // tambah riwayat penilaian
-    Route::get('/{id}', [\App\Http\Controllers\RiwayatPenilaianController::class, 'show']); // detail riwayat
-    Route::put('/{id}', [\App\Http\Controllers\RiwayatPenilaianController::class, 'update']); // update
-    Route::delete('/{id}', [\App\Http\Controllers\RiwayatPenilaianController::class, 'destroy']); // hapus
-});
+
 
 });

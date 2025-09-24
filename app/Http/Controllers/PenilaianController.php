@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\KomplainNilai;
 use Illuminate\Http\Request;
 
-class KomplainNilaiController extends Controller
+class PenilaianController extends Controller
 {
     // Tampilkan semua komplain
     public function index()

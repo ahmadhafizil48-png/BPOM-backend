@@ -10,7 +10,9 @@ use Illuminate\Http\Request;
 
 class LaporanRiwayatController extends Controller
 {
-    // 🔹 Ambil semua data (admin, selesai, ditolak, pelamar)
+    /**
+     * 🔹 Ambil semua riwayat sekaligus
+     */
     public function index()
     {
         $riwayatAdmin = RiwayatAdmin::with('admin:id,name')->latest()->get();
@@ -34,7 +36,9 @@ class LaporanRiwayatController extends Controller
         ]);
     }
 
-    // 🔹 Riwayat admin saja
+    /**
+     * 🔹 Ambil riwayat admin saja
+     */
     public function riwayatAdmin()
     {
         return response()->json(
@@ -42,7 +46,9 @@ class LaporanRiwayatController extends Controller
         );
     }
 
-    // 🔹 Riwayat user selesai magang
+    /**
+     * 🔹 Ambil riwayat user yang selesai magang
+     */
     public function riwayatUserSelesai()
     {
         return response()->json(
@@ -50,17 +56,17 @@ class LaporanRiwayatController extends Controller
         );
     }
 
-    // 🔹 Riwayat user ditolak dengan opsi filter
+    /**
+     * 🔹 Ambil riwayat user yang ditolak, bisa difilter
+     */
     public function riwayatUserDitolak(Request $request)
     {
         $query = RiwayatUserDitolak::query();
 
-        // Filter berdasarkan tanggal (opsional)
         if ($request->has('tanggal')) {
             $query->whereDate('tanggal_tolak', $request->tanggal);
         }
 
-        // Filter berdasarkan divisi (opsional)
         if ($request->has('divisi')) {
             $query->where('divisi', $request->divisi);
         }
@@ -68,7 +74,9 @@ class LaporanRiwayatController extends Controller
         return response()->json($query->latest()->get());
     }
 
-    // 🔹 Riwayat semua pelamar
+    /**
+     * 🔹 Ambil semua pelamar
+     */
     public function riwayatPelamar()
     {
         $riwayatPelamar = Magang::select(
@@ -84,11 +92,22 @@ class LaporanRiwayatController extends Controller
         return response()->json($riwayatPelamar);
     }
 
-    // 🔹 Opsi filter
+    /**
+     * 🔹 Ambil opsi filter yang tersedia
+     */
     public function getFilterOptions()
     {
         return response()->json([
             'filter_types' => ['semua', 'tanggal', 'divisi', 'status']
         ]);
+    }
+
+    /**
+     * 🔹 Export data (misal CSV / Excel)
+     */
+    public function export(Request $request)
+    {
+        // Placeholder: tambahkan logika export sesuai kebutuhan
+        return response()->json(['message' => 'Export berhasil']);
     }
 }

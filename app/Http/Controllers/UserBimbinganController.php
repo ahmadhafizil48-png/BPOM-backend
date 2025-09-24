@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\RiwayatUserBimbingan;
 use Illuminate\Http\Request;
 
-class RiwayatUserBimbinganController extends Controller
+class UserBimbinganController extends Controller
 {
     public function index()
     {

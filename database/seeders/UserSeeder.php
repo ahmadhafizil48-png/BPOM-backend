@@ -1,22 +1,23 @@
 <?php
-// Update UserSeeder dengan password yang benar
-
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Clear existing users first
-        User::truncate();
-        
-        // Create users with correct password hash
+        // Hapus semua data lama, aman walau ada foreign key
+        DB::table('users')->delete();
+
+        // Reset auto increment (opsional, biar mulai dari 1 lagi)
+        DB::statement('ALTER TABLE users AUTO_INCREMENT = 1;');
+
+        // Tambah user Admin
         User::create([
-            'id' => 1,
             'name' => 'Admin BPOM',
             'email' => 'admin@bpom.go.id',
             'password' => Hash::make('123456'),
@@ -24,8 +25,8 @@ class UserSeeder extends Seeder
             'email_verified_at' => now()
         ]);
 
+        // Tambah user Pembimbing
         User::create([
-            'id' => 2,
             'name' => 'Dr. Siti Pembimbing',
             'email' => 'pembimbing@bpom.go.id',
             'password' => Hash::make('123456'),
@@ -33,8 +34,8 @@ class UserSeeder extends Seeder
             'email_verified_at' => now()
         ]);
 
+        // Tambah user Mahasiswa
         User::create([
-            'id' => 3,
             'name' => 'Andi Mahasiswa',
             'email' => 'user@bpom.go.id',
             'password' => Hash::make('123456'),
