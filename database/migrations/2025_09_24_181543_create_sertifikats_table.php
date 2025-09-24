@@ -10,13 +10,15 @@ return new class extends Migration
     {
         Schema::create('sertifikats', function (Blueprint $table) {
             $table->id();
-            $table->string('nama'); // nama peserta / pemegang sertifikat
-            $table->unsignedBigInteger('divisi_id')->nullable(); // relasi ke divisi
-            $table->date('tanggal_selesai')->nullable();
-            $table->enum('status', ['pending', 'selesai', 'batal'])->default('pending');
-            $table->timestamps();
 
+            // gabungan field dari add_fields_to_sertifikats_table
+            $table->string('nama');
+            $table->unsignedBigInteger('divisi_id')->nullable();
             $table->foreign('divisi_id')->references('id')->on('divisis')->onDelete('set null');
+            $table->date('tanggal_selesai')->nullable();
+            $table->enum('status', ['pending','selesai','batal'])->default('pending');
+
+            $table->timestamps();
         });
     }
 

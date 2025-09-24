@@ -10,10 +10,12 @@ return new class extends Migration {
         Schema::create('daftar_akun', function (Blueprint $table) {
             $table->id();
             $table->string('username')->unique();
+            $table->string('email')->unique(); // gabungan dari add email
             $table->string('nama');
+            $table->string('password');        // gabungan dari add password
             $table->enum('role', ['Admin', 'Pembimbing', 'User']);
             $table->enum('status', ['Aktif', 'Nonaktif'])->default('Aktif');
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps(); // created_at & updated_at
         });
     }
 

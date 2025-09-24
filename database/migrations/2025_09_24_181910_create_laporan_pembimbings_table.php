@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('laporan_pembimbings', function (Blueprint $table) {
             $table->id();
-            $table->string('nama');
-            $table->string('divisi');
+            $table->string('nama')->nullable();
+            $table->string('divisi')->nullable();
             $table->integer('jumlah_user')->default(0);
             $table->integer('selesai')->default(0);
             $table->float('rata_nilai')->nullable();

@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->string('alamat_univ')->nullable();
             $table->string('jurusan');
             $table->integer('semester');
+            $table->string('status_pengajuan')->default('belum diproses'); // digabung langsung
             $table->string('divisi_tujuan');
             $table->date('waktu_mulai')->nullable();
             $table->date('waktu_selesai')->nullable();
@@ -26,6 +27,7 @@ return new class extends Migration {
             $table->string('status')->default('Belum Diproses');
             $table->timestamps();
 
+            // Relasi ke tabel magang
             $table->foreign('magang_id')
                 ->references('id')
                 ->on('magang')

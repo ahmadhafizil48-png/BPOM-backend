@@ -9,10 +9,10 @@ return new class extends Migration {
     {
         Schema::create('riwayat_admins', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('admin_id')->constrained('users')->onDelete('cascade');
-            $table->string('aksi');
-            $table->timestamp('tanggal')->useCurrent();
-            $table->timestamps();
+            $table->foreignId('admin_id')->constrained('users')->onDelete('cascade'); 
+            $table->string('aksi'); // contoh: tambah user, hapus data, update status
+            $table->timestamp('tanggal')->useCurrent(); 
+            $table->timestamps(); // created_at & updated_at
         });
     }
 
