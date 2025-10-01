@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
             'email' => 'admin@bpom.go.id',
             'password' => Hash::make('123456'),
             'role_id' => 1,
-            'email_verified_at' => now()
+            
         ]);
 
         // Tambah user Pembimbing
@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
             'email' => 'pembimbing@bpom.go.id',
             'password' => Hash::make('123456'),
             'role_id' => 2,
-            'email_verified_at' => now()
+            
         ]);
 
         // Tambah user Mahasiswa
@@ -40,7 +40,7 @@ class UserSeeder extends Seeder
             'email' => 'user@bpom.go.id',
             'password' => Hash::make('123456'),
             'role_id' => 3,
-            'email_verified_at' => now()
+            
         ]);
     }
 }

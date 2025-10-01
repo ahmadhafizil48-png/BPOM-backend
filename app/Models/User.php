@@ -17,6 +17,7 @@ class User extends Authenticatable
         'password',
         'role_id',
         'pembimbing_id',
+        'is_active',
     ];
 
     protected $hidden = [
@@ -26,18 +27,13 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'password'          => 'hashed',
+        'is_active'         => 'boolean',
     ];
 
-    // ✅ Relasi ke Role
+    // Relasi ke role (jika ada tabel roles)
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id');
-    }
-
-    // ✅ Relasi ke Pembimbing
-    public function pembimbing()
-    {
-        return $this->belongsTo(Pembimbing::class, 'pembimbing_id');
     }
 }

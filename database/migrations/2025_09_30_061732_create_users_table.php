@@ -12,9 +12,17 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->foreignId('role_id')->nullable()->constrained('roles')->onDelete('set null');
+
+            // ✅ Status user (aktif / nonaktif)
+            $table->boolean('is_active')->default(1);
+
+            // ✅ Role user (admin / pembimbing / mahasiswa)
+            $table->unsignedBigInteger('role_id')->nullable();
+
+            // ✅ Jika nanti ada relasi dengan pembimbing
+            $table->unsignedBigInteger('pembimbing_id')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
         });
