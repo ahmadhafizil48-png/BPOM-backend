@@ -9,44 +9,39 @@ class DivisiController extends Controller
 {
     public function index()
     {
-        return Divisi::all();
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'nama_divisi' => 'required|string|max:255',
-            'deskripsi'   => 'nullable|string',
-        ]);
-
-        $divisi = Divisi::create($validated);
-
-        return response()->json([
-            'message' => 'Divisi berhasil ditambahkan',
-            'data' => $divisi
-        ], 201);
+        return response()->json(Divisi::all());
     }
 
     public function show($id)
     {
-        return Divisi::findOrFail($id);
+        $divisi = Divisi::findOrFail($id);
+        return response()->json($divisi);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nama_divisi' => 'required|string|max:255',
+            'deskripsi'   => 'nullable|string',
+            'kuota'       => 'required|integer|min:0',
+        ]);
+
+        $divisi = Divisi::create($request->all());
+        return response()->json($divisi, 201);
     }
 
     public function update(Request $request, $id)
     {
         $divisi = Divisi::findOrFail($id);
 
-        $validated = $request->validate([
-            'nama_divisi' => 'required|string|max:255',
+        $request->validate([
+            'nama_divisi' => 'sometimes|required|string|max:255',
             'deskripsi'   => 'nullable|string',
+            'kuota'       => 'sometimes|required|integer|min:0',
         ]);
 
-        $divisi->update($validated);
-
-        return response()->json([
-            'message' => 'Divisi berhasil diperbarui',
-            'data' => $divisi
-        ]);
+        $divisi->update($request->all());
+        return response()->json($divisi);
     }
 
     public function destroy($id)
@@ -54,8 +49,13 @@ class DivisiController extends Controller
         $divisi = Divisi::findOrFail($id);
         $divisi->delete();
 
-        return response()->json([
-            'message' => 'Divisi berhasil dihapus'
-        ]);
+        return response()->json(['message' => 'Divisi deleted successfully']);
+    }
+
+    // ✅ tambahan fungsi untuk mahasiswa lihat kuota
+    public function listKuota()
+    {
+        $divisi = Divisi::select('id', 'nama_divisi', 'kuota')->get();
+        return response()->json($divisi);
     }
 }
