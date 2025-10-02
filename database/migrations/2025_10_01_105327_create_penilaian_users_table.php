@@ -10,8 +10,7 @@ return new class extends Migration
     {
         Schema::create('penilaian_user', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            // referensi ke tugas/proyek yg dikerjakan user (opsional)
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // konsisten dengan model
             $table->foreignId('proyek_user_id')->nullable()->constrained('proyek_user')->onDelete('set null');
 
             // skor (0-100)
@@ -31,7 +30,6 @@ return new class extends Migration
 
             $table->timestamps();
 
-            // Index untuk query cepat
             $table->index(['user_id', 'proyek_user_id']);
         });
     }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Role;
 
 class User extends Authenticatable
 {
@@ -31,7 +32,7 @@ class User extends Authenticatable
         'is_active'         => 'boolean',
     ];
 
-    // Relasi ke role (jika ada tabel roles)
+    // Relasi ke role
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id');

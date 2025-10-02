@@ -16,6 +16,8 @@ class ProyekUser extends Model
         'divisi_id',
         'nama_proyek',
         'status',
+        'tanggal_mulai',
+        'tanggal_selesai',
     ];
 
     public function user()
@@ -28,8 +30,8 @@ class ProyekUser extends Model
         return $this->belongsTo(Divisi::class);
     }
 
-    public function progress()
+    public function penilaian()
     {
-        return $this->hasMany(ProyekProgress::class, 'proyek_user_id');
+        return $this->hasMany(PenilaianUser::class, 'proyek_user_id');
     }
 }

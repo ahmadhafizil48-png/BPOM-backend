@@ -27,17 +27,17 @@ class PenilaianUserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'proyek_user_id' => 'nullable|exists:proyek_users,id',
-            'kehadiran' => 'nullable|integer|between:0,100',
-            'taat_jadwal' => 'nullable|integer|between:0,100',
+            'user_id'        => 'required|exists:users,id',
+            'proyek_user_id' => 'nullable|exists:proyek_user,id',
+            'kehadiran'      => 'nullable|integer|between:0,100',
+            'taat_jadwal'    => 'nullable|integer|between:0,100',
             'penguasaan_materi' => 'nullable|integer|between:0,100',
-            'praktek_kerja' => 'nullable|integer|between:0,100',
-            'inisiatif' => 'nullable|integer|between:0,100',
-            'komunikasi' => 'nullable|integer|between:0,100',
-            'laporan_kerja' => 'nullable|integer|between:0,100',
-            'presentasi' => 'nullable|integer|between:0,100',
-            'catatan' => 'nullable|string',
+            'praktek_kerja'  => 'nullable|integer|between:0,100',
+            'inisiatif'      => 'nullable|integer|between:0,100',
+            'komunikasi'     => 'nullable|integer|between:0,100',
+            'laporan_kerja'  => 'nullable|integer|between:0,100',
+            'presentasi'     => 'nullable|integer|between:0,100',
+            'catatan'        => 'nullable|string',
         ]);
 
         // hitung nilai
@@ -50,7 +50,7 @@ class PenilaianUserController extends Controller
         $nilai_rata = $scores->count() ? round($nilai_total / $scores->count(), 2) : null;
 
         $validated['nilai_total'] = $nilai_total;
-        $validated['nilai_rata'] = $nilai_rata;
+        $validated['nilai_rata']  = $nilai_rata;
 
         $penilaian = PenilaianUser::create($validated);
 
@@ -73,15 +73,15 @@ class PenilaianUserController extends Controller
         $penilaian = PenilaianUser::findOrFail($id);
 
         $validated = $request->validate([
-            'kehadiran' => 'nullable|integer|between:0,100',
-            'taat_jadwal' => 'nullable|integer|between:0,100',
-            'penguasaan_materi' => 'nullable|integer|between:0,100',
-            'praktek_kerja' => 'nullable|integer|between:0,100',
-            'inisiatif' => 'nullable|integer|between:0,100',
-            'komunikasi' => 'nullable|integer|between:0,100',
-            'laporan_kerja' => 'nullable|integer|between:0,100',
-            'presentasi' => 'nullable|integer|between:0,100',
-            'catatan' => 'nullable|string',
+            'kehadiran'        => 'nullable|integer|between:0,100',
+            'taat_jadwal'      => 'nullable|integer|between:0,100',
+            'penguasaan_materi'=> 'nullable|integer|between:0,100',
+            'praktek_kerja'    => 'nullable|integer|between:0,100',
+            'inisiatif'        => 'nullable|integer|between:0,100',
+            'komunikasi'       => 'nullable|integer|between:0,100',
+            'laporan_kerja'    => 'nullable|integer|between:0,100',
+            'presentasi'       => 'nullable|integer|between:0,100',
+            'catatan'          => 'nullable|string',
         ]);
 
         $penilaian->update($validated);
@@ -93,7 +93,7 @@ class PenilaianUserController extends Controller
         ])->filter()->values();
 
         $penilaian->nilai_total = $scores->sum();
-        $penilaian->nilai_rata = $scores->count() ? round($penilaian->nilai_total / $scores->count(), 2) : null;
+        $penilaian->nilai_rata  = $scores->count() ? round($penilaian->nilai_total / $scores->count(), 2) : null;
         $penilaian->save();
 
         return response()->json([

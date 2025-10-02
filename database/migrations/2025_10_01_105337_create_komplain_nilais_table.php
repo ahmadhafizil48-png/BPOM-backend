@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('komplain_nilais', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('users_id')->constrained('users')->onDelete('cascade');
             // optional link ke penilaian yang dikomplain
             $table->foreignId('penilaian_id')->nullable()->constrained('penilaian_user')->onDelete('set null');
 
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('status', ['Pending', 'Setuju', 'Tolak'])->default('Pending');
 
             $table->timestamps();
-            $table->index(['user_id','status']);
+            $table->index(['users_id','status']);
         });
     }
 

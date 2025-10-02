@@ -22,7 +22,7 @@ class KomplainNilaiController extends Controller
     {
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'penilaian_id' => 'nullable|exists:penilaian_users,id',
+            'penilaian_id' => 'nullable|exists:penilaian_user,id',
             'proyek' => 'nullable|string|max:255',
             'isi_komplain' => 'required|string',
         ]);
