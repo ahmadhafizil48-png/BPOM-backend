@@ -14,7 +14,8 @@ class Divisi extends Model
     protected $fillable = [
     'nama_divisi',
     'deskripsi',
-    'kuota',   // ← tambahan
+    'kuota',
+    'maksimal_kuota', // ← tambahan
 ];
 
 }

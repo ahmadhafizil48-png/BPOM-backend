@@ -21,10 +21,12 @@ class DivisiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_divisi' => 'required|string|max:255',
-            'deskripsi'   => 'nullable|string',
-            'kuota'       => 'required|integer|min:0',
-        ]);
+    'nama_divisi'    => 'required|string|max:255',
+    'deskripsi'      => 'nullable|string',
+    'kuota'          => 'required|integer|min:0',
+    'maksimal_kuota' => 'required|integer|min:0',
+]);
+
 
         $divisi = Divisi::create($request->all());
         return response()->json($divisi, 201);
@@ -35,10 +37,12 @@ class DivisiController extends Controller
         $divisi = Divisi::findOrFail($id);
 
         $request->validate([
-            'nama_divisi' => 'sometimes|required|string|max:255',
-            'deskripsi'   => 'nullable|string',
-            'kuota'       => 'sometimes|required|integer|min:0',
-        ]);
+    'nama_divisi'    => 'sometimes|required|string|max:255',
+    'deskripsi'      => 'nullable|string',
+    'kuota'          => 'sometimes|required|integer|min:0',
+    'maksimal_kuota' => 'sometimes|required|integer|min:0',
+]);
+
 
         $divisi->update($request->all());
         return response()->json($divisi);
