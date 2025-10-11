@@ -27,6 +27,9 @@ class KomplainNilaiController extends Controller
             'isi_komplain' => 'required|string',
         ]);
 
+        // status awal otomatis "pending"
+        $validated['status'] = 'pending';
+
         $komplain = KomplainNilai::create($validated);
 
         return response()->json([
@@ -35,7 +38,7 @@ class KomplainNilaiController extends Controller
         ], 201);
     }
 
-    // show
+    // detail komplain
     public function show($id)
     {
         $k = KomplainNilai::with(['user','penilaian'])->findOrFail($id);
@@ -46,7 +49,7 @@ class KomplainNilaiController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:Pending,Setuju,Tolak'
+            'status' => 'required|in:diterima,ditolak'
         ]);
 
         $k = KomplainNilai::findOrFail($id);

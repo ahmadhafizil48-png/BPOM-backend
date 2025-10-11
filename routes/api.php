@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -18,41 +18,45 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\PenilaianUserController;
 use App\Http\Controllers\KomplainNilaiController;
 use App\Http\Controllers\UserReportController;
+use App\Http\Controllers\KalenderController;
+use App\Http\Controllers\LogbookController;
+use App\Http\Controllers\AdminDashboardController;
 
 /*
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 | AUTH
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 */
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 /*
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 | PUBLIC – Formulir
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 */
 Route::post('/formulir', [FormulirController::class, 'store']);
 Route::post('/formulir/cek-status', [FormulirController::class, 'cekStatus']);
 
 /*
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 | PUBLIC – Pelamar
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 */
 Route::get('/pelamar', [PelamarController::class, 'index']);
 Route::get('/pelamar/{id}', [PelamarController::class, 'show']);
 
 /*
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 | PROTECTED – Admin
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', fn() => response()->json(['message' => 'Selamat datang Admin!']));
 
-    // User Management
+    // ✅ Admin Dashboard
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index']);
+
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::get('/{id}', [UserController::class, 'show']);
@@ -61,7 +65,9 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::delete('/{id}', [UserController::class, 'destroy']);
     });
 
-    // Formulir Management
+    // ✅ Detail pelamar (khusus admin)
+    Route::get('/admin/users/{id}/detail', [UserController::class, 'showDetailPelamar']);
+
     Route::get('/formulir', [FormulirController::class, 'index']);
     Route::get('/formulir/{id}', [FormulirController::class, 'show']);
     Route::put('/formulir/{id}', [FormulirController::class, 'update']);
@@ -70,54 +76,53 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 });
 
 /*
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 | PROTECTED – Pembimbing
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'role:pembimbing'])->group(function () {
     Route::get('/pembimbing/dashboard', fn() => response()->json(['message' => 'Selamat datang Pembimbing!']));
 
-    // Formulir untuk pembimbing
-    Route::get('/formulir', [FormulirController::class, 'index']);
-    Route::get('/formulir/{id}', [FormulirController::class, 'show']);
-    Route::put('/formulir/{id}', [FormulirController::class, 'update']);
-    Route::put('/formulir/{id}/status', [FormulirController::class, 'updateStatus']);
-    Route::delete('/formulir/{id}', [FormulirController::class, 'destroy']);
-
-    // Data Bimbingan
     Route::get('/pembimbing/data-bimbingan', [DataBimbinganController::class, 'index']);
     Route::get('/pembimbing/data-bimbingan/{id}', [DataBimbinganController::class, 'show']);
 
-    // Penilaian User
     Route::apiResource('penilaian-user', PenilaianUserController::class);
 
-    // User Reports
     Route::get('/user-aktif', [UserReportController::class, 'userAktif']);
     Route::get('/riwayat-penilaian/{user_id}', [UserReportController::class, 'riwayatPenilaian']);
 });
 
 /*
-|---------------------------------------------------------------------------
-| PROTECTED – Mahasiswa
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
+| PROTECTED – Mahasiswa / User
+|--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
     Route::get('/user/dashboard', fn() => response()->json(['message' => 'Selamat datang Mahasiswa!']));
 
-    // Komplain Nilai
-    Route::post('/komplain', [KomplainNilaiController::class, 'store']);
-    Route::post('/komplain-nilai', [KomplainNilaiController::class, 'store']); // tambahan agar route lama tetap jalan
+    Route::get('/user/profile', [UserController::class, 'profile']);
+    Route::put('/user/profile', [UserController::class, 'updateProfile']);
+    Route::put('/user/change-password', [UserController::class, 'changePassword']);
 
-    // Lihat kuota divisi
+    Route::post('/komplain', [KomplainNilaiController::class, 'store']);
+    Route::get('/penilaian-user/me', [PenilaianUserController::class, 'myScore']);
+
     Route::get('/divisi/kuota/list', [DivisiController::class, 'listKuota']);
+    Route::apiResource('proyek-progress', ProyekProgressController::class);
+
+    Route::get('/kalender', [KalenderController::class, 'index']);
+    Route::post('/kalender', [KalenderController::class, 'store']);
+    Route::get('/kalender/{id}', [KalenderController::class, 'show']);
+    Route::put('/kalender/{id}', [KalenderController::class, 'update']);
+    Route::delete('/kalender/{id}', [KalenderController::class, 'destroy']);
 });
 
 /*
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 | PROTECTED – Pembimbing & Admin (Komplain Nilai)
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 */
-Route::middleware(['auth:sanctum','role:pembimbing,admin'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:pembimbing,admin'])->group(function () {
     Route::get('/komplain', [KomplainNilaiController::class, 'index']);
     Route::get('/komplain/{id}', [KomplainNilaiController::class, 'show']);
     Route::put('/komplain/{id}', [KomplainNilaiController::class, 'update']);
@@ -125,15 +130,18 @@ Route::middleware(['auth:sanctum','role:pembimbing,admin'])->group(function () {
 });
 
 /*
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 | PUBLIC – Pembimbing & Divisi
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 */
 Route::prefix('pembimbing')->group(function () {
     Route::get('/', [PembimbingController::class, 'index']);
     Route::post('/', [PembimbingController::class, 'store']);
     Route::post('/{id}/assign', [PembimbingController::class, 'assignUser']);
     Route::delete('/{id}', [PembimbingController::class, 'destroy']);
+
+    // ✅ Route detail dashboard pembimbing
+    Route::get('/{id}/dashboard', [PembimbingController::class, 'dashboard']);
 });
 
 Route::prefix('divisi')->group(function () {
@@ -145,9 +153,9 @@ Route::prefix('divisi')->group(function () {
 });
 
 /*
-|---------------------------------------------------------------------------
-| Pimpinan
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
+| PIMPINAN
+|--------------------------------------------------------------------------
 */
 Route::get('/pimpinan', [PimpinanController::class, 'index']);
 Route::post('/pimpinan', [PimpinanController::class, 'store']);
@@ -156,17 +164,17 @@ Route::delete('/pimpinan/{id}', [PimpinanController::class, 'destroy']);
 Route::put('/pimpinan/{id}/aktif', [PimpinanController::class, 'setActive']);
 
 /*
-|---------------------------------------------------------------------------
-| API Resources
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
+| RIWAYAT & LAPORAN
+|--------------------------------------------------------------------------
 */
 Route::apiResource('riwayat', RiwayatController::class);
 Route::apiResource('laporan', LaporanController::class);
 
 /*
-|---------------------------------------------------------------------------
-| Riwayat Bimbingan
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
+| RIWAYAT BIMBINGAN
+|--------------------------------------------------------------------------
 */
 Route::get('/riwayat-bimbingan', [RiwayatBimbinganController::class, 'index']);
 Route::get('/riwayat-bimbingan/{id}', [RiwayatBimbinganController::class, 'show']);
@@ -175,23 +183,17 @@ Route::put('/riwayat-bimbingan/{id}', [RiwayatBimbinganController::class, 'updat
 Route::delete('/riwayat-bimbingan/{id}', [RiwayatBimbinganController::class, 'destroy']);
 
 /*
-|---------------------------------------------------------------------------
-| Proyek User
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
+| PROYEK USER & PROGRESS
+|--------------------------------------------------------------------------
 */
 Route::apiResource('proyek-user', ProyekUserController::class);
-
-/*
-|---------------------------------------------------------------------------
-| Progress Proyek
-|---------------------------------------------------------------------------
-*/
 Route::apiResource('proyek-progress', ProyekProgressController::class);
 
 /*
-|---------------------------------------------------------------------------
-| Absensi
-|---------------------------------------------------------------------------
+|--------------------------------------------------------------------------
+| ABSENSI
+|--------------------------------------------------------------------------
 */
 Route::prefix('absensi')->group(function () {
     Route::post('/', [AbsensiController::class, 'store']);
@@ -199,4 +201,29 @@ Route::prefix('absensi')->group(function () {
     Route::get('/riwayat', [AbsensiController::class, 'riwayat']);
     Route::post('/approve/{id}', [AbsensiController::class, 'approve']);
     Route::post('/reject/{id}', [AbsensiController::class, 'reject']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| LOGBOOK
+|--------------------------------------------------------------------------
+*/
+Route::get('/logbook', [LogbookController::class, 'index']);
+Route::post('/logbook', [LogbookController::class, 'store']);
+
+/*
+|--------------------------------------------------------------------------
+| SERTIFIKAT & FEEDBACK (Mahasiswa)
+|--------------------------------------------------------------------------
+*/
+Route::post('/feedback', [\App\Http\Controllers\FeedbackController::class, 'store']);
+Route::get('/feedback/check', [\App\Http\Controllers\FeedbackController::class, 'check']);
+Route::get('/sertifikat/download', [\App\Http\Controllers\FeedbackController::class, 'downloadSertifikat']);
+
+Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
+    Route::get('/user/dashboard', [\App\Http\Controllers\UserDashboardController::class, 'index']);
+});
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/user/{id}/detail', [UserController::class, 'detail']);
 });

@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Role;
+use App\Models\Pembimbing;
+use App\Models\Formulir; // ✅ tambahkan ini
 
 class User extends Authenticatable
 {
@@ -32,9 +34,21 @@ class User extends Authenticatable
         'is_active'         => 'boolean',
     ];
 
-    // Relasi ke role
+    // 🔸 Relasi ke Role
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    // 🔸 Relasi ke Pembimbing
+    public function pembimbing()
+    {
+        return $this->belongsTo(Pembimbing::class, 'pembimbing_id');
+    }
+
+    // 🔸 Relasi ke Formulir (untuk data detail user)
+    public function formulir()
+    {
+        return $this->hasOne(Formulir::class, 'nama', 'name');
     }
 }

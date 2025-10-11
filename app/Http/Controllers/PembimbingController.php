@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Pembimbing;
 use App\Models\User;
+use App\Models\Formulir;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class PembimbingController extends Controller
 {
@@ -51,6 +53,48 @@ class PembimbingController extends Controller
 
         return response()->json([
             'message' => 'Pembimbing berhasil dihapus'
+        ]);
+    }
+
+    // ✅ Dashboard Pembimbing (fungsi baru)
+    public function dashboard($id)
+    {
+        $pembimbing = Pembimbing::with(['users.formulir'])->find($id);
+
+        if (!$pembimbing) {
+            return response()->json(['message' => 'Pembimbing tidak ditemukan'], 404);
+        }
+
+        $users = $pembimbing->users;
+
+        // Hitung user aktif & selesai
+        $userAktif = $users->where('is_active', true)->count();
+        $userSelesai = $users->filter(function ($u) {
+            return optional($u->formulir)->status_pengajuan === 'selesai';
+        })->count();
+
+        // Reminder meeting terdekat (contoh hardcoded dulu)
+        $reminder = [
+            'judul' => 'Meeting bimbingan',
+            'tanggal' => Carbon::create(2025, 9, 5, 10, 0, 0)->format('d M Y, H:i') . ' WIB',
+        ];
+
+        // Data untuk chart
+        $statusChart = [
+            'Aktif' => $userAktif,
+            'Selesai' => $userSelesai,
+            'Belum Mulai' => $users->count() - ($userAktif + $userSelesai),
+        ];
+
+        return response()->json([
+            'message' => 'Dashboard pembimbing berhasil diambil',
+            'data' => [
+                'pembimbing' => $pembimbing->nama,
+                'user_aktif' => $userAktif,
+                'user_selesai' => $userSelesai,
+                'reminder' => $reminder,
+                'status_chart' => $statusChart,
+            ]
         ]);
     }
 }

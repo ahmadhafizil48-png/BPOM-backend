@@ -25,4 +25,10 @@ class Pembimbing extends Model
     {
         return $this->belongsToMany(User::class, 'pembimbing_user');
     }
+
+    // ✅ Tambahan baru — tidak menghapus fungsi lama
+    public function user()
+    {
+        return $this->hasOne(User::class, 'pembimbing_id');
+    }
 }
