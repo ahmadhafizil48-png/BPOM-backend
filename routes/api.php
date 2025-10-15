@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -21,6 +21,9 @@ use App\Http\Controllers\UserReportController;
 use App\Http\Controllers\KalenderController;
 use App\Http\Controllers\LogbookController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\UserAktifController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\UserDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,6 +60,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // ✅ Admin Dashboard
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index']);
 
+    // ✅ Users Management
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::get('/{id}', [UserController::class, 'show']);
@@ -68,6 +72,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // ✅ Detail pelamar (khusus admin)
     Route::get('/admin/users/{id}/detail', [UserController::class, 'showDetailPelamar']);
 
+    // ✅ Formulir (Admin)
     Route::get('/formulir', [FormulirController::class, 'index']);
     Route::get('/formulir/{id}', [FormulirController::class, 'show']);
     Route::put('/formulir/{id}', [FormulirController::class, 'update']);
@@ -81,6 +86,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'role:pembimbing'])->group(function () {
+
     Route::get('/pembimbing/dashboard', fn() => response()->json(['message' => 'Selamat datang Pembimbing!']));
 
     Route::get('/pembimbing/data-bimbingan', [DataBimbinganController::class, 'index']);
@@ -98,6 +104,7 @@ Route::middleware(['auth:sanctum', 'role:pembimbing'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
+
     Route::get('/user/dashboard', fn() => response()->json(['message' => 'Selamat datang Mahasiswa!']));
 
     Route::get('/user/profile', [UserController::class, 'profile']);
@@ -139,8 +146,6 @@ Route::prefix('pembimbing')->group(function () {
     Route::post('/', [PembimbingController::class, 'store']);
     Route::post('/{id}/assign', [PembimbingController::class, 'assignUser']);
     Route::delete('/{id}', [PembimbingController::class, 'destroy']);
-
-    // ✅ Route detail dashboard pembimbing
     Route::get('/{id}/dashboard', [PembimbingController::class, 'dashboard']);
 });
 
@@ -216,14 +221,27 @@ Route::post('/logbook', [LogbookController::class, 'store']);
 | SERTIFIKAT & FEEDBACK (Mahasiswa)
 |--------------------------------------------------------------------------
 */
-Route::post('/feedback', [\App\Http\Controllers\FeedbackController::class, 'store']);
-Route::get('/feedback/check', [\App\Http\Controllers\FeedbackController::class, 'check']);
-Route::get('/sertifikat/download', [\App\Http\Controllers\FeedbackController::class, 'downloadSertifikat']);
+Route::post('/feedback', [FeedbackController::class, 'store']);
+Route::get('/feedback/check', [FeedbackController::class, 'check']);
+Route::get('/sertifikat/download', [FeedbackController::class, 'downloadSertifikat']);
 
 Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
-    Route::get('/user/dashboard', [\App\Http\Controllers\UserDashboardController::class, 'index']);
+    Route::get('/user/dashboard', [UserDashboardController::class, 'index']);
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/{id}/detail', [UserController::class, 'detail']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| USER AKTIF
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth:sanctum', 'role:admin,pembimbing'])->group(function () {
+    Route::get('/user-aktif', [UserAktifController::class, 'index']);
+    Route::get('/user-aktif/{id}', [UserAktifController::class, 'show']);
+    Route::post('/user-aktif', [UserAktifController::class, 'store']);
+    Route::put('/user-aktif/{id}', [UserAktifController::class, 'update']);
+    Route::delete('/user-aktif/{id}', [UserAktifController::class, 'destroy']);
 });
