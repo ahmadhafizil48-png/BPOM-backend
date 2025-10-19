@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('pimpinan', function (Blueprint $table) {
             $table->id();
+            $table->string('nama');
+            $table->string('jabatan');
+            $table->string('kantor');
+            $table->string('tanda_tangan'); // bisa simpan path file tanda tangan
+            $table->enum('status', ['Aktif', 'Nonaktif'])->default('Nonaktif');
             $table->timestamps();
         });
     }
@@ -22,15 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::create('pimpinan', function (Blueprint $table) {
-    $table->id();
-    $table->string('nama');
-    $table->string('jabatan');
-    $table->string('kantor');
-    $table->string('tanda_tangan'); // bisa simpan path file tanda tangan
-    $table->enum('status', ['Aktif', 'Nonaktif'])->default('Nonaktif');
-    $table->timestamps();
-});
-
+        Schema::dropIfExists('pimpinan');
     }
 };
