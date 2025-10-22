@@ -9,11 +9,16 @@ return new class extends Migration {
     {
         Schema::create('user_aktif', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); 
-            $table->foreignId('divisi_id')->nullable()->constrained('divisis')->onDelete('set null'); 
+
+            // Relasi utama
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('divisi_id')->nullable()->constrained('divisis')->onDelete('set null');
             $table->foreignId('pembimbing_id')->nullable()->constrained('pembimbings')->onDelete('set null');
+
+            // Status dan aktifasi
             $table->enum('status_akun', ['Ada Akun', 'Tidak Ada Akun'])->default('Tidak Ada Akun');
-            $table->boolean('is_active')->default(true); // true = aktif, false = nonaktif
+            $table->boolean('is_active')->default(true);
+
             $table->timestamps();
         });
     }
@@ -23,4 +28,3 @@ return new class extends Migration {
         Schema::dropIfExists('user_aktif');
     }
 };
-
