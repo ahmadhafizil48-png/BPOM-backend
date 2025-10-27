@@ -11,8 +11,9 @@ return new class extends Migration
         Schema::create('formulir', function (Blueprint $table) {
             $table->id();
 
-            // ✅ Relasi ke tabel users (setiap formulir dimiliki oleh 1 user)
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            // ❌ Hapus constraint biar gak error
+            // ✅ Simpan sebagai kolom biasa dulu
+            $table->unsignedBigInteger('user_id')->nullable(); 
 
             $table->string('no_formulir')->unique(); // Contoh: F-20250001
             $table->string('nama');
