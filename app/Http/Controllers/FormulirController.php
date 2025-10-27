@@ -6,7 +6,6 @@ use App\Models\Formulir;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -33,7 +32,7 @@ class FormulirController extends Controller
             'surat_permohonan'   => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
 
-        // Upload file jika ada
+        // 📎 Upload file jika ada
         if ($request->hasFile('proposal')) {
             $validated['proposal'] = $request->file('proposal')->store('proposal', 'public');
         }
@@ -41,8 +40,14 @@ class FormulirController extends Controller
             $validated['surat_permohonan'] = $request->file('surat_permohonan')->store('surat', 'public');
         }
 
+        // 🔹 Tambahan otomatis
         $validated['status_pengajuan'] = 'belum diproses';
+        $validated['no_formulir'] = 'F-' . date('Y') . str_pad(Formulir::count() + 1, 4, '0', STR_PAD_LEFT);
 
+        // Jika user sedang login → pakai ID-nya, kalau tidak → default (misalnya admin 1)
+        $validated['user_id'] = auth()->check() ? auth()->id() : 1;
+
+        // 💾 Simpan ke database
         $formulir = Formulir::create($validated);
 
         return response()->json([
@@ -66,15 +71,13 @@ class FormulirController extends Controller
             ->first();
 
         if (!$formulir) {
-            return response()->json([
-                'message' => 'Data tidak ditemukan',
-            ], 404);
+            return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
 
         return response()->json([
-            'message'         => 'Data ditemukan',
-            'status_pengajuan'=> $formulir->status_pengajuan,
-            'data'            => $formulir,
+            'message'          => 'Data ditemukan',
+            'status_pengajuan' => $formulir->status_pengajuan,
+            'data'             => $formulir,
         ]);
     }
 
@@ -95,7 +98,6 @@ class FormulirController extends Controller
     public function show($id)
     {
         $formulir = Formulir::find($id);
-
         if (!$formulir) {
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
@@ -136,6 +138,7 @@ class FormulirController extends Controller
             'status_pengajuan'   => 'sometimes|in:belum diproses,sedang diproses,diterima,ditolak',
         ]);
 
+        // Ganti file jika ada upload baru
         if ($request->hasFile('proposal')) {
             if ($formulir->proposal) {
                 Storage::disk('public')->delete($formulir->proposal);
@@ -158,9 +161,7 @@ class FormulirController extends Controller
     }
 
     /**
-     * ADMIN/PEMBIMBING – update status.
-     * Jika status menjadi "diterima" → otomatis buat akun user (sekali saja).
-     * Default password untuk akun baru: "password"
+     * ADMIN/PEMBIMBING – update status + buat akun otomatis jika diterima
      */
     public function updateStatus(Request $request, $id)
     {
@@ -180,33 +181,29 @@ class FormulirController extends Controller
         $account = null;
         $generatedPassword = null;
 
+        // Jika baru diterima → buat akun user otomatis
         if ($oldStatus !== 'diterima' && $request->status_pengajuan === 'diterima') {
-            // Email sintetis dari NIK
             $email = $formulir->nik . '@pelamar.local';
-
-            // Cek jika user dengan email ini sudah ada
             $existing = User::where('email', $email)->first();
 
             if (!$existing) {
-                // Default password sesuai permintaan = "password"
                 $generatedPassword = 'password';
-
                 $account = User::create([
-                    'name'         => $formulir->nama,
-                    'email'        => $email,
-                    'password'     => Hash::make($generatedPassword),
-                    'role_id'      => 3,      // asumsi 3 = mahasiswa (sesuaikan seed jika perlu)
-                    'pembimbing_id'=> null,
-                    'is_active'    => true,
+                    'name'          => $formulir->nama,
+                    'email'         => $email,
+                    'password'      => Hash::make($generatedPassword),
+                    'role_id'       => 3, // role mahasiswa
+                    'pembimbing_id' => null,
+                    'is_active'     => true,
                 ]);
             }
         }
 
         return response()->json([
-            'message'        => 'Status berhasil diperbarui',
-            'data'           => $formulir,
-            'account'        => $account,
-            'default_pass'   => $generatedPassword, // hanya dikirim jika akun baru dibuat
+            'message'      => 'Status berhasil diperbarui',
+            'data'         => $formulir,
+            'account'      => $account,
+            'default_pass' => $generatedPassword,
         ]);
     }
 

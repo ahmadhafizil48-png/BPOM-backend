@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserAktif;
+use App\Models\Formulir;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,6 +19,7 @@ class UserAktifController extends Controller
             return response()->json(['message' => 'Akses ditolak, hanya admin yang dapat melihat data ini.'], 403);
         }
 
+        // Ambil semua user aktif dengan relasi user, divisi, pembimbing, dan formulir
         $data = UserAktif::with(['user', 'divisi', 'pembimbing'])->get();
 
         return response()->json([
@@ -28,6 +30,7 @@ class UserAktifController extends Controller
 
     /**
      * Menampilkan detail user aktif berdasarkan ID
+     * (data detail diambil dari tabel formulir)
      */
     public function show($id)
     {
@@ -36,15 +39,33 @@ class UserAktifController extends Controller
             return response()->json(['message' => 'Akses ditolak, hanya admin yang dapat melihat detail ini.'], 403);
         }
 
+        // Ambil data user aktif
         $userAktif = UserAktif::with(['user', 'divisi', 'pembimbing'])->findOrFail($id);
+
+        // Ambil data formulir berdasarkan user_id
+        $form = Formulir::where('user_id', $userAktif->user_id)->first();
+
+        if (!$form) {
+            return response()->json([
+                'message' => 'Data formulir belum tersedia untuk user ini.'
+            ], 404);
+        }
 
         return response()->json([
             'message' => 'Detail User Aktif',
             'data' => [
                 'nama' => $userAktif->user->name ?? '-',
-                'email' => $userAktif->user->email ?? '-',
+                'nik' => $form->nik ?? '-',
+                'nim' => $form->nim ?? '-',
+                'nohp' => $form->no_hp ?? '-',
+                'universitas' => $form->universitas ?? '-',
+                'alamatuniv' => $form->alamat_universitas ?? '-',
+                'jurusan' => $form->jurusan ?? '-',
+                'semester' => $form->semester ?? '-',
                 'divisi' => $userAktif->divisi->nama_divisi ?? '-',
                 'pembimbing' => $userAktif->pembimbing->nama ?? '-',
+                'tanggalmulai' => $form->waktu_mulai ? date('d F Y', strtotime($form->waktu_mulai)) : '-',
+                'tanggalselesai' => $form->waktu_selesai ? date('d F Y', strtotime($form->waktu_selesai)) : '-',
                 'status_akun' => $userAktif->status_akun,
                 'is_active' => $userAktif->is_active ? 'Aktif' : 'Nonaktif',
             ]

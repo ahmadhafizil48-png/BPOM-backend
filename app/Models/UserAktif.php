@@ -19,21 +19,36 @@ class UserAktif extends Model
         'is_active',
     ];
 
-    // Relasi ke tabel users
+    /**
+     * Relasi ke tabel users
+     */
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Relasi ke tabel divisis
+    /**
+     * Relasi ke tabel divisis
+     */
     public function divisi()
     {
         return $this->belongsTo(Divisi::class, 'divisi_id');
     }
 
-    // Relasi ke tabel pembimbings
+    /**
+     * Relasi ke tabel pembimbings
+     */
     public function pembimbing()
     {
         return $this->belongsTo(Pembimbing::class, 'pembimbing_id');
+    }
+
+    /**
+     * Relasi ke tabel formulir
+     * Menghubungkan user_aktif.user_id dengan formulir.user_id
+     */
+    public function formulir()
+    {
+        return $this->hasOne(Formulir::class, 'user_id', 'user_id');
     }
 }
