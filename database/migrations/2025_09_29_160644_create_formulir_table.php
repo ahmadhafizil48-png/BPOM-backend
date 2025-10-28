@@ -11,10 +11,14 @@ return new class extends Migration
         Schema::create('formulir', function (Blueprint $table) {
             $table->id();
 
-            // ❌ Hapus constraint biar gak error
-            // ✅ Simpan sebagai kolom biasa dulu
-            $table->unsignedBigInteger('user_id')->nullable(); 
+            // ✅ Hubungkan dengan tabel users (relasi one-to-many)
+            $table->foreignId('user_id')
+                  ->nullable()
+                  ->constrained('users')
+                  ->onDelete('set null'); 
+            // kalau user dihapus, kolom ini jadi null, tidak error
 
+            // 🧾 Identitas dasar
             $table->string('no_formulir')->unique(); // Contoh: F-20250001
             $table->string('nama');
             $table->string('nik')->unique();
@@ -36,7 +40,7 @@ return new class extends Migration
             $table->string('proposal')->nullable();
             $table->string('surat_permohonan')->nullable();
 
-            // 📊 Status magang
+            // 📊 Status pengajuan
             $table->enum('status_pengajuan', [
                 'belum diproses',
                 'sedang diproses',

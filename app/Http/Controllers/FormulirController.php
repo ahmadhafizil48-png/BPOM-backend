@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth; // ✅ Tambahkan ini agar tidak merah
 use Illuminate\Validation\Rule;
 
 class FormulirController extends Controller
@@ -44,8 +45,8 @@ class FormulirController extends Controller
         $validated['status_pengajuan'] = 'belum diproses';
         $validated['no_formulir'] = 'F-' . date('Y') . str_pad(Formulir::count() + 1, 4, '0', STR_PAD_LEFT);
 
-        // Jika user sedang login → pakai ID-nya, kalau tidak → default (misalnya admin 1)
-        $validated['user_id'] = auth()->check() ? auth()->id() : 1;
+        // ✅ Gunakan Auth facade agar tidak merah di VS Code
+        $validated['user_id'] = Auth::check() ? Auth::id() : 1;
 
         // 💾 Simpan ke database
         $formulir = Formulir::create($validated);
