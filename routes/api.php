@@ -116,7 +116,14 @@ Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
 
     Route::get('/divisi/kuota/list', [DivisiController::class, 'listKuota']);
     Route::apiResource('proyek-progress', ProyekProgressController::class);
+});
 
+/*
+|--------------------------------------------------------------------------
+| PROTECTED – Kalender (Bisa diakses semua role)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth:sanctum', 'role:admin,pembimbing,user'])->group(function () {
     Route::get('/kalender', [KalenderController::class, 'index']);
     Route::post('/kalender', [KalenderController::class, 'store']);
     Route::get('/kalender/{id}', [KalenderController::class, 'show']);
@@ -239,7 +246,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
-  Route::get('/user-aktif', [UserAktifController::class, 'index']);
+    Route::get('/user-aktif', [UserAktifController::class, 'index']);
     Route::get('/user-aktif/{id}', [UserAktifController::class, 'show']);
     Route::post('/user-aktif', [UserAktifController::class, 'store']);
     Route::put('/user-aktif/{id}', [UserAktifController::class, 'update']);
