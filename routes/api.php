@@ -217,11 +217,15 @@ Route::prefix('absensi')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| LOGBOOK
+| LOGBOOK (Upload Lampiran + Akses Semua Role)
 |--------------------------------------------------------------------------
 */
-Route::get('/logbook', [LogbookController::class, 'index']);
-Route::post('/logbook', [LogbookController::class, 'store']);
+Route::middleware(['auth:sanctum', 'role:admin,pembimbing,user'])->group(function () {
+    Route::get('/logbook', [LogbookController::class, 'index']);
+    Route::post('/logbook', [LogbookController::class, 'store']);
+    Route::post('/logbook/{id}', [LogbookController::class, 'update']);
+    Route::delete('/logbook/{id}', [LogbookController::class, 'destroy']);
+});
 
 /*
 |--------------------------------------------------------------------------
