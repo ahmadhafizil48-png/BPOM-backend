@@ -15,11 +15,22 @@ return new class extends Migration
             $table->date('tanggal_selesai');            // kolom sesuai gambar
             $table->enum('status', ['Belum Dibuat', 'Sudah Dibuat'])->default('Belum Dibuat');
             $table->string('file')->nullable();         // file sertifikat (optional)
+
+            // 🆕 Tambahan: file laporan magang
+            $table->string('laporan')->nullable();      // laporan magang sebelum download sertifikat
+
             $table->timestamps();
 
             // Foreign keys
-            $table->foreign('pelamar_id')->references('id')->on('pelamars')->onDelete('cascade');
-            $table->foreign('divisi_id')->references('id')->on('divisis')->onDelete('cascade');
+            $table->foreign('pelamar_id')
+                  ->references('id')
+                  ->on('pelamars')
+                  ->onDelete('cascade');
+
+            $table->foreign('divisi_id')
+                  ->references('id')
+                  ->on('divisis')
+                  ->onDelete('cascade');
         });
     }
 

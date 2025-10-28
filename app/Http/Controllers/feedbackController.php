@@ -11,9 +11,10 @@ class FeedbackController extends Controller
     {
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'rating' => 'required|integer|min(1)|max(5)',
+            'rating' => 'required|numeric|between:1,5',
             'pendapat' => 'required|string',
             'saran' => 'nullable|string',
+            'file_laporan' => 'required|file|mimes:pdf,doc,docx|max:2048',
         ]);
 
         // Cegah user kirim feedback lebih dari sekali
@@ -21,9 +22,21 @@ class FeedbackController extends Controller
             return response()->json(['message' => 'Feedback sudah pernah dikirim'], 409);
         }
 
+        // Upload file laporan
+        if ($request->hasFile('file_laporan')) {
+            $file = $request->file('file_laporan');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('laporan', $fileName, 'public');
+
+            $validated['file_laporan'] = $fileName;
+        }
+
         $feedback = Feedback::create($validated);
 
-        return response()->json(['message' => 'Feedback berhasil dikirim', 'data' => $feedback], 201);
+        return response()->json([
+            'message' => 'Feedback & laporan berhasil dikirim',
+            'data' => $feedback
+        ], 201);
     }
 
     public function checkFeedback($user_id)

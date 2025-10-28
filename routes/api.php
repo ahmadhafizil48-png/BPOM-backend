@@ -24,6 +24,7 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserAktifController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\SertifikatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,10 +58,8 @@ Route::get('/pelamar/{id}', [PelamarController::class, 'show']);
 */
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 
-    // ✅ Admin Dashboard
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index']);
 
-    // ✅ Users Management
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::get('/{id}', [UserController::class, 'show']);
@@ -69,10 +68,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::delete('/{id}', [UserController::class, 'destroy']);
     });
 
-    // ✅ Detail pelamar (khusus admin)
     Route::get('/admin/users/{id}/detail', [UserController::class, 'showDetailPelamar']);
 
-    // ✅ Formulir (Admin)
     Route::get('/formulir', [FormulirController::class, 'index']);
     Route::get('/formulir/{id}', [FormulirController::class, 'show']);
     Route::put('/formulir/{id}', [FormulirController::class, 'update']);
@@ -105,7 +102,7 @@ Route::middleware(['auth:sanctum', 'role:pembimbing'])->group(function () {
 */
 Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
 
-    Route::get('/user/dashboard', fn() => response()->json(['message' => 'Selamat datang Mahasiswa!']));
+    Route::get('/user/dashboard', [UserDashboardController::class, 'index']);
 
     Route::get('/user/profile', [UserController::class, 'profile']);
     Route::put('/user/profile', [UserController::class, 'updateProfile']);
@@ -116,11 +113,22 @@ Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
 
     Route::get('/divisi/kuota/list', [DivisiController::class, 'listKuota']);
     Route::apiResource('proyek-progress', ProyekProgressController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | SERTIFIKAT + FEEDBACK + UPLOAD LAPORAN
+    |--------------------------------------------------------------------------
+    */
+    Route::post('/feedback', [FeedbackController::class, 'store']);
+    Route::get('/feedback/check/{user_id}', [FeedbackController::class, 'checkFeedback']);
+
+    Route::post('/upload-laporan', [SertifikatController::class, 'uploadLaporan']);
+    Route::get('/sertifikat/download', [SertifikatController::class, 'download']);
 });
 
 /*
 |--------------------------------------------------------------------------
-| PROTECTED – Kalender (Bisa diakses semua role)
+| PROTECTED – Kalender (Semua Role)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'role:admin,pembimbing,user'])->group(function () {
@@ -133,7 +141,7 @@ Route::middleware(['auth:sanctum', 'role:admin,pembimbing,user'])->group(functio
 
 /*
 |--------------------------------------------------------------------------
-| PROTECTED – Pembimbing & Admin (Komplain Nilai)
+| PROTECTED – Komplain Nilai
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'role:pembimbing,admin'])->group(function () {
@@ -217,7 +225,7 @@ Route::prefix('absensi')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| LOGBOOK (Upload Lampiran + Akses Semua Role)
+| LOGBOOK
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'role:admin,pembimbing,user'])->group(function () {
@@ -229,24 +237,7 @@ Route::middleware(['auth:sanctum', 'role:admin,pembimbing,user'])->group(functio
 
 /*
 |--------------------------------------------------------------------------
-| SERTIFIKAT & FEEDBACK (Mahasiswa)
-|--------------------------------------------------------------------------
-*/
-Route::post('/feedback', [FeedbackController::class, 'store']);
-Route::get('/feedback/check', [FeedbackController::class, 'check']);
-Route::get('/sertifikat/download', [FeedbackController::class, 'downloadSertifikat']);
-
-Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
-    Route::get('/user/dashboard', [UserDashboardController::class, 'index']);
-});
-
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/user/{id}/detail', [UserController::class, 'detail']);
-});
-
-/*
-|--------------------------------------------------------------------------
-| USER AKTIF (Baru & Lengkap)
+| USER AKTIF
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {

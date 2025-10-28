@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::create('feedback', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-    $table->tinyInteger('rating'); // 1-5
-    $table->text('pendapat');
-    $table->text('saran')->nullable();
-    $table->timestamps();
-});
-
+        Schema::create('feedback', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->tinyInteger('rating'); // 1-5
+            $table->text('pendapat');
+            $table->text('saran')->nullable();
+            $table->string('file_laporan')->nullable(); // 🔥 Tambahan untuk upload laporan
+            $table->timestamps();
+        });
     }
 
     /**
