@@ -60,6 +60,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index']);
 
+    // ✅ Manajemen User
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::get('/{id}', [UserController::class, 'show']);
@@ -70,6 +71,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 
     Route::get('/admin/users/{id}/detail', [UserController::class, 'showDetailPelamar']);
 
+    // ✅ Formulir (Admin)
     Route::get('/formulir', [FormulirController::class, 'index']);
     Route::get('/formulir/{id}', [FormulirController::class, 'show']);
     Route::put('/formulir/{id}', [FormulirController::class, 'update']);
@@ -104,13 +106,16 @@ Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
 
     Route::get('/user/dashboard', [UserDashboardController::class, 'index']);
 
+    // 🔹 Profil user
     Route::get('/user/profile', [UserController::class, 'profile']);
     Route::put('/user/profile', [UserController::class, 'updateProfile']);
     Route::put('/user/change-password', [UserController::class, 'changePassword']);
 
+    // 🔹 Komplain dan nilai
     Route::post('/komplain', [KomplainNilaiController::class, 'store']);
     Route::get('/penilaian-user/me', [PenilaianUserController::class, 'myScore']);
 
+    // 🔹 Divisi dan proyek
     Route::get('/divisi/kuota/list', [DivisiController::class, 'listKuota']);
     Route::apiResource('proyek-progress', ProyekProgressController::class);
 
@@ -122,8 +127,8 @@ Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
     Route::post('/feedback', [FeedbackController::class, 'store']);
     Route::get('/feedback/check/{user_id}', [FeedbackController::class, 'checkFeedback']);
 
-    Route::post('/upload-laporan', [SertifikatController::class, 'uploadLaporan']);
-    Route::get('/sertifikat/download', [SertifikatController::class, 'download']);
+    Route::post('/upload-laporan', [SertifikatController::class, 'uploadLaporan']); // ✅ upload laporan
+    Route::get('/sertifikat/download', [SertifikatController::class, 'download']); // ✅ download sertifikat
 });
 
 /*

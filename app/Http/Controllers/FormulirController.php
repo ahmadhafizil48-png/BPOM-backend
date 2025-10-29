@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Formulir;
 use App\Models\User;
+use App\Models\UserAktif;
+use App\Models\Divisi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth; // ✅ Tambahkan ini agar tidak merah
 use Illuminate\Validation\Rule;
 
 class FormulirController extends Controller
@@ -33,7 +34,7 @@ class FormulirController extends Controller
             'surat_permohonan'   => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
 
-        // 📎 Upload file jika ada
+        // Upload file jika ada
         if ($request->hasFile('proposal')) {
             $validated['proposal'] = $request->file('proposal')->store('proposal', 'public');
         }
@@ -41,14 +42,11 @@ class FormulirController extends Controller
             $validated['surat_permohonan'] = $request->file('surat_permohonan')->store('surat', 'public');
         }
 
-        // 🔹 Tambahan otomatis
+        // Tambahan otomatis
         $validated['status_pengajuan'] = 'belum diproses';
         $validated['no_formulir'] = 'F-' . date('Y') . str_pad(Formulir::count() + 1, 4, '0', STR_PAD_LEFT);
+        $validated['user_id'] = null;
 
-        // ✅ Gunakan Auth facade agar tidak merah di VS Code
-        $validated['user_id'] = Auth::check() ? Auth::id() : 1;
-
-        // 💾 Simpan ke database
         $formulir = Formulir::create($validated);
 
         return response()->json([
@@ -58,7 +56,7 @@ class FormulirController extends Controller
     }
 
     /**
-     * PUBLIC – cek status pengajuan (nik + nim)
+     * PUBLIC – cek status pengajuan
      */
     public function cekStatus(Request $request)
     {
@@ -83,7 +81,7 @@ class FormulirController extends Controller
     }
 
     /**
-     * ADMIN/PEMBIMBING – list semua formulir
+     * ADMIN/PEMBIMBING – lihat semua formulir
      */
     public function index()
     {
@@ -122,8 +120,8 @@ class FormulirController extends Controller
         $validated = $request->validate([
             'nama'               => 'sometimes|required|string|max:255',
             'nik'                => [
-                'sometimes','required','digits_between:8,20',
-                Rule::unique('formulir','nik')->ignore($formulir->id),
+                'sometimes', 'required', 'digits_between:8,20',
+                Rule::unique('formulir', 'nik')->ignore($formulir->id),
             ],
             'nim'                => 'nullable|digits_between:8,20',
             'no_hp'              => 'sometimes|required|digits_between:10,15',
@@ -162,7 +160,7 @@ class FormulirController extends Controller
     }
 
     /**
-     * ADMIN/PEMBIMBING – update status + buat akun otomatis jika diterima
+     * ADMIN/PEMBIMBING – update status dan buat akun otomatis
      */
     public function updateStatus(Request $request, $id)
     {
@@ -175,15 +173,14 @@ class FormulirController extends Controller
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
 
-        $oldStatus = $formulir->status_pengajuan;
         $formulir->status_pengajuan = $request->status_pengajuan;
         $formulir->save();
 
         $account = null;
         $generatedPassword = null;
 
-        // Jika baru diterima → buat akun user otomatis
-        if ($oldStatus !== 'diterima' && $request->status_pengajuan === 'diterima') {
+        // Jika diterima dan belum punya akun → buat otomatis
+        if ($request->status_pengajuan === 'diterima' && !$formulir->user_id) {
             $email = $formulir->nik . '@pelamar.local';
             $existing = User::where('email', $email)->first();
 
@@ -193,8 +190,23 @@ class FormulirController extends Controller
                     'name'          => $formulir->nama,
                     'email'         => $email,
                     'password'      => Hash::make($generatedPassword),
-                    'role_id'       => 3, // role mahasiswa
+                    'role_id'       => 3,
                     'pembimbing_id' => null,
+                    'is_active'     => true,
+                ]);
+
+                // Update user_id di tabel formulir
+                $formulir->update(['user_id' => $account->id]);
+
+                // Ambil divisi yang sesuai
+                $divisi = Divisi::where('nama_divisi', $formulir->divisi_tujuan)->first();
+
+                // Tambah ke user_aktif
+                UserAktif::create([
+                    'user_id'       => $account->id,
+                    'divisi_id'     => $divisi->id ?? null,
+                    'pembimbing_id' => null,
+                    'status_akun'   => 'Ada Akun',
                     'is_active'     => true,
                 ]);
             }
