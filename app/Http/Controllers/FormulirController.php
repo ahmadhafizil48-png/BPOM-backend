@@ -10,11 +10,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth; // ✅ Tambahkan ini untuk Auth::check() dan Auth::id()
 
 class FormulirController extends Controller
 {
     /**
-     * PUBLIC – simpan pengajuan formulir (tanpa login)
+     * PUBLIC – simpan pengajuan formulir (bisa login atau tidak)
      */
     public function store(Request $request)
     {
@@ -45,7 +46,9 @@ class FormulirController extends Controller
         // Tambahan otomatis
         $validated['status_pengajuan'] = 'belum diproses';
         $validated['no_formulir'] = 'F-' . date('Y') . str_pad(Formulir::count() + 1, 4, '0', STR_PAD_LEFT);
-        $validated['user_id'] = null;
+
+        // 👇 Perubahan utama: simpan user_id kalau login, jika tidak null
+        $validated['user_id'] = Auth::check() ? Auth::id() : null;
 
         $formulir = Formulir::create($validated);
 
