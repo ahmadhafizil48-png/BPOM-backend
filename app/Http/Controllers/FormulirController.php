@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Auth; // ✅ Tambahkan ini untuk Auth::check() dan Auth::id()
+use Illuminate\Support\Facades\Auth;
 
 class FormulirController extends Controller
 {
@@ -47,13 +47,31 @@ class FormulirController extends Controller
         $validated['status_pengajuan'] = 'belum diproses';
         $validated['no_formulir'] = 'F-' . date('Y') . str_pad(Formulir::count() + 1, 4, '0', STR_PAD_LEFT);
 
-        // 👇 Perubahan utama: simpan user_id kalau login, jika tidak null
-        $validated['user_id'] = Auth::check() ? Auth::id() : null;
+        /**
+         * ✅ Kalau user login → ambil ID-nya
+         * ✅ Kalau belum login → buat akun baru otomatis
+         */
+        if (Auth::check()) {
+            $validated['user_id'] = Auth::id();
+        } else {
+            $email = $request->nik . '@pelamar.local';
+            $user = User::firstOrCreate(
+                ['email' => $email],
+                [
+                    'name' => $request->nama,
+                    'password' => Hash::make('password'),
+                    'role_id' => 3,
+                    'is_active' => true,
+                ]
+            );
+
+            $validated['user_id'] = $user->id;
+        }
 
         $formulir = Formulir::create($validated);
 
         return response()->json([
-            'message' => 'Pengajuan formulir berhasil disimpan',
+            'message' => 'Formulir berhasil dikirim dan user_id telah dihubungkan.',
             'data'    => $formulir,
         ], 201);
     }
