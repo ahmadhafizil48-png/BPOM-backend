@@ -53,6 +53,7 @@ class FormulirController extends Controller
          */
         if (Auth::check()) {
             $validated['user_id'] = Auth::id();
+            $user = Auth::user();
         } else {
             $email = $request->nik . '@pelamar.local';
             $user = User::firstOrCreate(
@@ -64,11 +65,23 @@ class FormulirController extends Controller
                     'is_active' => true,
                 ]
             );
-
             $validated['user_id'] = $user->id;
         }
 
+        // Simpan formulir
         $formulir = Formulir::create($validated);
+
+        // ✅ Tambahkan otomatis ke tabel user_aktif juga
+        $divisi = Divisi::where('nama_divisi', $request->divisi_tujuan)->first();
+        UserAktif::firstOrCreate(
+            ['user_id' => $user->id],
+            [
+                'divisi_id'     => $divisi->id ?? null,
+                'pembimbing_id' => null,
+                'status_akun'   => 'Ada Akun',
+                'is_active'     => true,
+            ]
+        );
 
         return response()->json([
             'message' => 'Formulir berhasil dikirim dan user_id telah dihubungkan.',
@@ -158,7 +171,6 @@ class FormulirController extends Controller
             'status_pengajuan'   => 'sometimes|in:belum diproses,sedang diproses,diterima,ditolak',
         ]);
 
-        // Ganti file jika ada upload baru
         if ($request->hasFile('proposal')) {
             if ($formulir->proposal) {
                 Storage::disk('public')->delete($formulir->proposal);
@@ -200,7 +212,6 @@ class FormulirController extends Controller
         $account = null;
         $generatedPassword = null;
 
-        // Jika diterima dan belum punya akun → buat otomatis
         if ($request->status_pengajuan === 'diterima' && !$formulir->user_id) {
             $email = $formulir->nik . '@pelamar.local';
             $existing = User::where('email', $email)->first();
@@ -216,13 +227,10 @@ class FormulirController extends Controller
                     'is_active'     => true,
                 ]);
 
-                // Update user_id di tabel formulir
                 $formulir->update(['user_id' => $account->id]);
 
-                // Ambil divisi yang sesuai
                 $divisi = Divisi::where('nama_divisi', $formulir->divisi_tujuan)->first();
 
-                // Tambah ke user_aktif
                 UserAktif::create([
                     'user_id'       => $account->id,
                     'divisi_id'     => $divisi->id ?? null,
