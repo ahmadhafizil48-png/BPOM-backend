@@ -47,10 +47,7 @@ class FormulirController extends Controller
         $validated['status_pengajuan'] = 'belum diproses';
         $validated['no_formulir'] = 'F-' . date('Y') . str_pad(Formulir::count() + 1, 4, '0', STR_PAD_LEFT);
 
-        /**
-         * ✅ Kalau user login → ambil ID-nya
-         * ✅ Kalau belum login → buat akun baru otomatis
-         */
+        // Jika user login → ambil ID, jika belum → buat akun baru otomatis
         if (Auth::check()) {
             $validated['user_id'] = Auth::id();
             $user = Auth::user();
@@ -71,12 +68,14 @@ class FormulirController extends Controller
         // Simpan formulir
         $formulir = Formulir::create($validated);
 
-        // ✅ Tambahkan otomatis ke tabel user_aktif juga
-        $divisi = Divisi::where('nama_divisi', $request->divisi_tujuan)->first();
-        UserAktif::firstOrCreate(
+        // Cari divisi dengan huruf bebas besar kecil
+        $divisi = Divisi::whereRaw('LOWER(nama_divisi) = ?', [strtolower(trim($request->divisi_tujuan))])->first();
+
+        // Tambahkan otomatis ke tabel user_aktif
+        UserAktif::updateOrCreate(
             ['user_id' => $user->id],
             [
-                'divisi_id'     => $divisi->id ?? null,
+                'divisi_id'     => $divisi ? $divisi->id : null,
                 'pembimbing_id' => null,
                 'status_akun'   => 'Ada Akun',
                 'is_active'     => true,
@@ -193,12 +192,14 @@ class FormulirController extends Controller
     }
 
     /**
-     * ADMIN/PEMBIMBING – update status dan buat akun otomatis
+     * ADMIN/PEMBIMBING – update status formulir dan sinkronkan ke tabel user_aktif
      */
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status_pengajuan' => 'required|in:belum diproses,sedang diproses,diterima,ditolak'
+            'status_pengajuan' => 'required|in:belum diproses,sedang diproses,diterima,ditolak',
+            'divisi_id'        => 'nullable|exists:divisis,id',
+            'pembimbing_id'    => 'nullable|exists:users,id',
         ]);
 
         $formulir = Formulir::find($id);
@@ -206,35 +207,21 @@ class FormulirController extends Controller
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
 
-        $formulir->status_pengajuan = $request->status_pengajuan;
-        $formulir->save();
+        $formulir->update(['status_pengajuan' => $request->status_pengajuan]);
 
-        $account = null;
-        $generatedPassword = null;
-
-        if ($request->status_pengajuan === 'diterima' && !$formulir->user_id) {
-            $email = $formulir->nik . '@pelamar.local';
-            $existing = User::where('email', $email)->first();
-
-            if (!$existing) {
-                $generatedPassword = 'password';
-                $account = User::create([
-                    'name'          => $formulir->nama,
-                    'email'         => $email,
-                    'password'      => Hash::make($generatedPassword),
-                    'role_id'       => 3,
-                    'pembimbing_id' => null,
-                    'is_active'     => true,
+        // Update user aktif hanya jika formulir diterima
+        if ($request->status_pengajuan === 'diterima') {
+            $userAktif = UserAktif::where('user_id', $formulir->user_id)->first();
+            if ($userAktif) {
+                $userAktif->update([
+                    'divisi_id'     => $request->divisi_id ?? $userAktif->divisi_id,
+                    'pembimbing_id' => $request->pembimbing_id ?? $userAktif->pembimbing_id,
                 ]);
-
-                $formulir->update(['user_id' => $account->id]);
-
-                $divisi = Divisi::where('nama_divisi', $formulir->divisi_tujuan)->first();
-
+            } else {
                 UserAktif::create([
-                    'user_id'       => $account->id,
-                    'divisi_id'     => $divisi->id ?? null,
-                    'pembimbing_id' => null,
+                    'user_id'       => $formulir->user_id,
+                    'divisi_id'     => $request->divisi_id ?? null,
+                    'pembimbing_id' => $request->pembimbing_id ?? null,
                     'status_akun'   => 'Ada Akun',
                     'is_active'     => true,
                 ]);
@@ -242,10 +229,8 @@ class FormulirController extends Controller
         }
 
         return response()->json([
-            'message'      => 'Status berhasil diperbarui',
-            'data'         => $formulir,
-            'account'      => $account,
-            'default_pass' => $generatedPassword,
+            'message' => 'Status formulir dan user aktif berhasil diperbarui',
+            'data'    => $formulir,
         ]);
     }
 
