@@ -15,9 +15,10 @@ class Formulir extends Model
     public $incrementing = true;
 
     protected $fillable = [
-        'user_id',              // ✅ ditambah karena ada relasi ke tabel users
+        'user_id',              // Relasi ke tabel users
         'no_formulir',
         'nama',
+        'email',                // ✅ Tambahan kolom email biar user isi langsung
         'nik',
         'nim',
         'no_hp',
@@ -25,12 +26,13 @@ class Formulir extends Model
         'alamat_universitas',
         'jurusan',
         'semester',
-        'divisi_tujuan',
+        'divisi_tujuan',        // divisi tetap dari user
         'waktu_mulai',
         'waktu_selesai',
         'proposal',
         'surat_permohonan',
         'status_pengajuan',
+        'pembimbing_id',        // ✅ Tambahan untuk admin set pembimbing
     ];
 
     protected $casts = [
@@ -40,7 +42,6 @@ class Formulir extends Model
 
     /**
      * 🔹 Relasi ke tabel users
-     * Setiap formulir dimiliki oleh satu user
      */
     public function user()
     {
@@ -48,7 +49,15 @@ class Formulir extends Model
     }
 
     /**
-     * 🔹 Relasi ke tabel user_aktif (opsional, kalau nanti mau dihubungkan)
+     * 🔹 Relasi ke pembimbing (admin bisa set ini)
+     */
+    public function pembimbing()
+    {
+        return $this->belongsTo(Pembimbing::class, 'pembimbing_id');
+    }
+
+    /**
+     * 🔹 Relasi ke user_aktif (optional)
      */
     public function userAktif()
     {
@@ -56,13 +65,12 @@ class Formulir extends Model
     }
 
     /**
-     * Boot model untuk auto-generate no_formulir dan default status.
-     * Format no_formulir: F-YYYY-XXXX (contoh: F-2025-0001)
+     * Boot model: generate no_formulir otomatis dan status default
      */
     protected static function booted()
     {
         static::creating(function (Formulir $formulir) {
-            // Auto generate no_formulir jika kosong
+            // Generate otomatis no_formulir
             if (empty($formulir->no_formulir)) {
                 $year = now()->format('Y');
                 $lastForYear = self::whereYear('created_at', $year)->orderBy('id', 'desc')->first();
@@ -71,7 +79,7 @@ class Formulir extends Model
                 $formulir->no_formulir = "F-{$year}-{$seq}";
             }
 
-            // Default status jika tidak dikirim
+            // Set status default
             if (empty($formulir->status_pengajuan)) {
                 $formulir->status_pengajuan = 'belum diproses';
             }

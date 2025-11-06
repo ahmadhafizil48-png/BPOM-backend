@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 namespace App\Http\Controllers;
 
@@ -23,6 +23,7 @@ class FormulirController extends Controller
             'nama'               => 'required|string|max:255',
             'nik'                => 'required|digits_between:8,20|unique:formulir,nik',
             'nim'                => 'nullable|digits_between:8,20',
+            'email'              => 'required|email|max:255|unique:formulir,email', // ✅ Tambah kolom email
             'no_hp'              => 'required|digits_between:10,15',
             'universitas'        => 'required|string|max:255',
             'alamat_universitas' => 'nullable|string|max:255',
@@ -48,11 +49,7 @@ class FormulirController extends Controller
         $validated['no_formulir'] = 'F-' . date('Y') . str_pad(Formulir::count() + 1, 4, '0', STR_PAD_LEFT);
 
         // Jika user login → ambil ID, jika belum login → biarkan null
-        if (Auth::check()) {
-            $validated['user_id'] = Auth::id();
-        } else {
-            $validated['user_id'] = null;
-        }
+        $validated['user_id'] = Auth::check() ? Auth::id() : null;
 
         // Simpan formulir
         $formulir = Formulir::create($validated);
@@ -132,6 +129,10 @@ class FormulirController extends Controller
                 Rule::unique('formulir', 'nik')->ignore($formulir->id),
             ],
             'nim'                => 'nullable|digits_between:8,20',
+            'email'              => [
+                'sometimes', 'required', 'email', 'max:255',
+                Rule::unique('formulir', 'email')->ignore($formulir->id),
+            ],
             'no_hp'              => 'sometimes|required|digits_between:10,15',
             'universitas'        => 'sometimes|required|string|max:255',
             'alamat_universitas' => 'nullable|string|max:255',
@@ -190,22 +191,24 @@ class FormulirController extends Controller
             $user = $formulir->user_id ? User::find($formulir->user_id) : null;
 
             if (!$user) {
-                $email = $formulir->nik . '@pelamar.local';
                 $user = User::create([
-                    'name' => $formulir->nama,
-                    'email' => $email,
-                    'password' => Hash::make('password'),
-                    'role_id' => 3,
+                    'name'      => $formulir->nama,
+                    'email'     => $formulir->email, // ✅ Email dari formulir
+                    'password'  => Hash::make('password'),
+                    'role_id'   => 3,
                     'is_active' => true,
                 ]);
                 $formulir->update(['user_id' => $user->id]);
             }
 
+            // ✅ Ambil divisi dari formulir jika admin tidak kirim manual
+            $divisiId = $request->divisi_id ?? Divisi::where('nama_divisi', $formulir->divisi_tujuan)->value('id');
+
             // Update atau buat user_aktif
             UserAktif::updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'divisi_id'     => $request->divisi_id ?? null,
+                    'divisi_id'     => $divisiId,
                     'pembimbing_id' => $request->pembimbing_id ?? null,
                     'status_akun'   => 'Ada Akun',
                     'is_active'     => true,

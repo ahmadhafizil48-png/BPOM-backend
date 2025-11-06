@@ -15,12 +15,13 @@ return new class extends Migration
             $table->foreignId('user_id')
                   ->nullable()
                   ->constrained('users')
-                  ->onDelete('set null'); 
+                  ->onDelete('set null');
             // kalau user dihapus, kolom ini jadi null, tidak error
 
             // 🧾 Identitas dasar
             $table->string('no_formulir')->unique(); // Contoh: F-20250001
             $table->string('nama');
+            $table->string('email')->nullable(); // ✅ tambahkan kolom email untuk user yang mendaftar
             $table->string('nik')->unique();
             $table->string('nim')->nullable();
             $table->string('no_hp');
