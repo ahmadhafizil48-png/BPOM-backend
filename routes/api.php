@@ -79,11 +79,13 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::delete('/formulir/{id}', [FormulirController::class, 'destroy']);
 
     // ✅ USER AKTIF (Admin)
-    Route::get('/user-aktif', [UserAktifController::class, 'index']);
-    Route::get('/user-aktif/{id}', [UserAktifController::class, 'show']);
-    Route::post('/user-aktif', [UserAktifController::class, 'store']);
-    Route::put('/user-aktif/{id}', [UserAktifController::class, 'update']);
-    Route::delete('/user-aktif/{id}', [UserAktifController::class, 'destroy']);
+    Route::prefix('admin/user-aktif')->group(function () {
+        Route::get('/', [UserAktifController::class, 'index']);
+        Route::get('/{id}', [UserAktifController::class, 'show']);
+        Route::post('/', [UserAktifController::class, 'store']);
+        Route::put('/{id}', [UserAktifController::class, 'update']);
+        Route::delete('/{id}', [UserAktifController::class, 'destroy']);
+    });
 });
 
 /*
@@ -103,10 +105,12 @@ Route::middleware(['auth:sanctum', 'role:pembimbing'])->group(function () {
     Route::get('/user-aktif', [UserReportController::class, 'userAktif']);
     Route::get('/riwayat-penilaian/{user_id}', [UserReportController::class, 'riwayatPenilaian']);
 
-    // ✅ PEMBIMBING BOLEH AKSES USER_AKTIF
-    Route::get('/pembimbing/user-aktif', [UserAktifController::class, 'index']);
-    Route::get('/pembimbing/user-aktif/{id}', [UserAktifController::class, 'show']);
-    Route::put('/pembimbing/user-aktif/{id}', [UserAktifController::class, 'update']);
+    // ✅ PEMBIMBING AKSES USER_AKTIF (pakai indexPembimbing)
+    Route::prefix('pembimbing/user-aktif')->group(function () {
+        Route::get('/', [UserAktifController::class, 'indexPembimbing']); // ← fungsi baru khusus pembimbing
+        Route::get('/{id}', [UserAktifController::class, 'show']);
+        Route::put('/{id}', [UserAktifController::class, 'update']);
+    });
 });
 
 /*
@@ -131,16 +135,11 @@ Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
     Route::get('/divisi/kuota/list', [DivisiController::class, 'listKuota']);
     Route::apiResource('proyek-progress', ProyekProgressController::class);
 
-    /*
-    |--------------------------------------------------------------------------
-    | SERTIFIKAT + FEEDBACK + UPLOAD LAPORAN
-    |--------------------------------------------------------------------------
-    */
+    // 🔹 SERTIFIKAT + FEEDBACK + UPLOAD LAPORAN
     Route::post('/feedback', [FeedbackController::class, 'store']);
     Route::get('/feedback/check/{user_id}', [FeedbackController::class, 'checkFeedback']);
-
-    Route::post('/upload-laporan', [SertifikatController::class, 'uploadLaporan']); // ✅ upload laporan
-    Route::get('/sertifikat/download', [SertifikatController::class, 'download']); // ✅ download sertifikat
+    Route::post('/upload-laporan', [SertifikatController::class, 'uploadLaporan']);
+    Route::get('/sertifikat/download', [SertifikatController::class, 'download']);
 });
 
 /*
