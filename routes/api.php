@@ -77,6 +77,13 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::put('/formulir/{id}', [FormulirController::class, 'update']);
     Route::put('/formulir/{id}/status', [FormulirController::class, 'updateStatus']);
     Route::delete('/formulir/{id}', [FormulirController::class, 'destroy']);
+
+    // ✅ USER AKTIF (Admin)
+    Route::get('/user-aktif', [UserAktifController::class, 'index']);
+    Route::get('/user-aktif/{id}', [UserAktifController::class, 'show']);
+    Route::post('/user-aktif', [UserAktifController::class, 'store']);
+    Route::put('/user-aktif/{id}', [UserAktifController::class, 'update']);
+    Route::delete('/user-aktif/{id}', [UserAktifController::class, 'destroy']);
 });
 
 /*
@@ -95,6 +102,11 @@ Route::middleware(['auth:sanctum', 'role:pembimbing'])->group(function () {
 
     Route::get('/user-aktif', [UserReportController::class, 'userAktif']);
     Route::get('/riwayat-penilaian/{user_id}', [UserReportController::class, 'riwayatPenilaian']);
+
+    // ✅ PEMBIMBING BOLEH AKSES USER_AKTIF
+    Route::get('/pembimbing/user-aktif', [UserAktifController::class, 'index']);
+    Route::get('/pembimbing/user-aktif/{id}', [UserAktifController::class, 'show']);
+    Route::put('/pembimbing/user-aktif/{id}', [UserAktifController::class, 'update']);
 });
 
 /*
@@ -238,17 +250,4 @@ Route::middleware(['auth:sanctum', 'role:admin,pembimbing,user'])->group(functio
     Route::post('/logbook', [LogbookController::class, 'store']);
     Route::post('/logbook/{id}', [LogbookController::class, 'update']);
     Route::delete('/logbook/{id}', [LogbookController::class, 'destroy']);
-});
-
-/*
-|--------------------------------------------------------------------------
-| USER AKTIF
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
-    Route::get('/user-aktif', [UserAktifController::class, 'index']);
-    Route::get('/user-aktif/{id}', [UserAktifController::class, 'show']);
-    Route::post('/user-aktif', [UserAktifController::class, 'store']);
-    Route::put('/user-aktif/{id}', [UserAktifController::class, 'update']);
-    Route::delete('/user-aktif/{id}', [UserAktifController::class, 'destroy']);
 });
