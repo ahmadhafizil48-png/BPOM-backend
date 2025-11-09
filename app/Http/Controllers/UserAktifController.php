@@ -10,50 +10,63 @@ use Illuminate\Support\Facades\Auth;
 class UserAktifController extends Controller
 {
     /**
-     * Menampilkan daftar user aktif (Admin bisa semua, Pembimbing hanya bimbingannya)
+     * Menampilkan daftar user aktif 
+     * - Admin bisa lihat semua
+     * - Pembimbing hanya bimbingannya sendiri
      */
     public function index()
     {
         $user = Auth::user();
 
-        // ✅ Jika admin → lihat semua user aktif
+        // Admin bisa melihat semua user aktif
         if ($user->role_id == 1) {
             $data = UserAktif::with(['user', 'divisi', 'pembimbing'])->get();
         }
-        // ✅ Jika pembimbing → lihat hanya user bimbingannya
+        // Pembimbing hanya melihat user yang dibimbingnya
         elseif ($user->role_id == 2) {
             $data = UserAktif::with(['user', 'divisi', 'pembimbing'])
                 ->where('pembimbing_id', $user->id)
                 ->get();
-        }
-        // ❌ Selain admin & pembimbing → tolak
+        } 
+        // Role lain tidak boleh akses
         else {
-            return response()->json(['message' => 'Akses ditolak, hanya admin atau pembimbing yang dapat melihat data ini.'], 403);
+            return response()->json([
+                'status' => false,
+                'message' => 'Akses ditolak, hanya admin atau pembimbing yang dapat melihat data ini.'
+            ], 403);
         }
 
         return response()->json([
-            'message' => 'Daftar User Aktif',
+            'status' => true,
+            'message' => 'Daftar User Aktif berhasil diambil.',
             'data' => $data
         ]);
     }
 
     /**
-     * Endpoint khusus pembimbing
+     * Endpoint khusus pembimbing 
+     * Hanya menampilkan mahasiswa yang dibimbingnya
      */
     public function indexPembimbing()
     {
         $user = Auth::user();
 
+        // Cek role harus pembimbing
         if ($user->role_id != 2) {
-            return response()->json(['message' => 'Akses ditolak, hanya pembimbing yang dapat melihat data ini.'], 403);
+            return response()->json([
+                'status' => false,
+                'message' => 'Akses ditolak, hanya pembimbing yang dapat melihat data ini.'
+            ], 403);
         }
 
+        // Ambil data user aktif yang pembimbing_id = user login
         $data = UserAktif::with(['user', 'divisi', 'pembimbing'])
             ->where('pembimbing_id', $user->id)
             ->get();
 
         return response()->json([
-            'message' => 'Daftar User Aktif Bimbingan Pembimbing',
+            'status' => true,
+            'message' => 'Daftar User Aktif Bimbingan Pembimbing.',
             'data' => $data
         ]);
     }
@@ -65,24 +78,36 @@ class UserAktifController extends Controller
     {
         $user = Auth::user();
 
+        // Hanya admin dan pembimbing
         if (!in_array($user->role_id, [1, 2])) {
-            return response()->json(['message' => 'Akses ditolak, hanya admin atau pembimbing yang dapat melihat detail ini.'], 403);
+            return response()->json([
+                'status' => false,
+                'message' => 'Akses ditolak, hanya admin atau pembimbing yang dapat melihat detail ini.'
+            ], 403);
         }
 
         $userAktif = UserAktif::with(['user', 'divisi', 'pembimbing'])->findOrFail($id);
 
+        // Pembimbing hanya bisa lihat mahasiswa bimbingannya sendiri
         if ($user->role_id == 2 && $userAktif->pembimbing_id != $user->id) {
-            return response()->json(['message' => 'Akses ditolak, bukan bimbingan Anda.'], 403);
+            return response()->json([
+                'status' => false,
+                'message' => 'Akses ditolak, bukan bimbingan Anda.'
+            ], 403);
         }
 
         $form = Formulir::where('user_id', $userAktif->user_id)->first();
 
         if (!$form) {
-            return response()->json(['message' => 'Data formulir belum tersedia untuk user ini.'], 404);
+            return response()->json([
+                'status' => false,
+                'message' => 'Data formulir belum tersedia untuk user ini.'
+            ], 404);
         }
 
         return response()->json([
-            'message' => 'Detail User Aktif',
+            'status' => true,
+            'message' => 'Detail User Aktif berhasil diambil.',
             'data' => [
                 'nama' => $userAktif->user->name ?? '-',
                 'nik' => $form->nik ?? '-',
@@ -108,8 +133,12 @@ class UserAktifController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+
         if ($user->role_id != 1) {
-            return response()->json(['message' => 'Akses ditolak, hanya admin yang dapat menambah user aktif.'], 403);
+            return response()->json([
+                'status' => false,
+                'message' => 'Akses ditolak, hanya admin yang dapat menambah user aktif.'
+            ], 403);
         }
 
         $request->validate([
@@ -128,7 +157,8 @@ class UserAktifController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'User aktif berhasil ditambahkan',
+            'status' => true,
+            'message' => 'User aktif berhasil ditambahkan.',
             'data' => $userAktif
         ], 201);
     }
@@ -139,8 +169,12 @@ class UserAktifController extends Controller
     public function update(Request $request, $id)
     {
         $user = Auth::user();
+
         if ($user->role_id != 1) {
-            return response()->json(['message' => 'Akses ditolak, hanya admin yang dapat memperbarui data.'], 403);
+            return response()->json([
+                'status' => false,
+                'message' => 'Akses ditolak, hanya admin yang dapat memperbarui data.'
+            ], 403);
         }
 
         $request->validate([
@@ -153,7 +187,8 @@ class UserAktifController extends Controller
         $userAktif->update($request->only(['divisi_id', 'pembimbing_id', 'status_akun']));
 
         return response()->json([
-            'message' => 'Data user aktif berhasil diperbarui',
+            'status' => true,
+            'message' => 'Data user aktif berhasil diperbarui.',
             'data' => $userAktif
         ]);
     }
@@ -164,15 +199,20 @@ class UserAktifController extends Controller
     public function destroy($id)
     {
         $user = Auth::user();
+
         if ($user->role_id != 1) {
-            return response()->json(['message' => 'Akses ditolak, hanya admin yang dapat menonaktifkan user.'], 403);
+            return response()->json([
+                'status' => false,
+                'message' => 'Akses ditolak, hanya admin yang dapat menonaktifkan user.'
+            ], 403);
         }
 
         $userAktif = UserAktif::findOrFail($id);
         $userAktif->update(['is_active' => false]);
 
         return response()->json([
-            'message' => 'User berhasil dinonaktifkan'
+            'status' => true,
+            'message' => 'User berhasil dinonaktifkan.'
         ]);
     }
 }
